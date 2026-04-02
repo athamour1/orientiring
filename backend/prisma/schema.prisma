@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEAM
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         Role     @default(TEAM)
+
+  eventId      Int?
+  event        Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  scans        Scan[]
+  location     TeamLocation?
+}
+
+model Event {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  startTime   DateTime?
+  endTime     DateTime?
+  isActive    Boolean      @default(false)
+  
+  checkpoints Checkpoint[]
+  teams       User[]
+}
+
+model Checkpoint {
+  id             Int      @id @default(autoincrement())
+  eventId        Int
+  name           String
+  latitude       Float
+  longitude      Float
+  pointValue     Int      @default(10)
+  qrSecretString String   @unique
+  
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scans          Scan[]
+}
+
+model Scan {
+  id           Int        @id @default(autoincrement())
+  teamId       Int
+  checkpointId Int
+  scannedAt    DateTime   @default(now())
+
+  team         User       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  // Enforces that a team can scan a specific checkpoint only once
+  @@unique([teamId, checkpointId])
+}
+
+model TeamLocation {
+  id        Int      @id @default(autoincrement())
+  teamId    Int      @unique
+  latitude  Float
+  longitude Float
+  updatedAt DateTime @updatedAt
+
+  team      User     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
