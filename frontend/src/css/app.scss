@@ -1,0 +1,52 @@
+// app global css in SCSS form
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// ── Global typography ───────────────────────────────────────────────────────
+* { font-family: 'Inter', 'Roboto', sans-serif; }
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+// Ensure all inputs are pill shaped
+.q-field__control {
+  border-radius: 9999px !important;
+}
+
+// ── Smooth dark-mode transitions ────────────────────────────────────────────
+body, .q-card, .q-drawer, .q-header, .q-footer, .q-page,
+.q-table, .q-item, .q-toolbar, .q-field__inner {
+  transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+// ── Buttons: pill-shaped + no-caps ──────────────────────────────────────────
+// Quasar puts the label text in `.q-btn .block` — override there
+.q-btn .block,
+.q-btn__content {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+// Make all non-icon (text/action) buttons pill-shaped
+.q-btn:not(.q-btn--round) {
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+
+// ── Consistent card border radius ───────────────────────────────────────────
+.q-card {
+  border-radius: 14px !important;
+}
+
+// ── Consistent table header style ───────────────────────────────────────────
+.q-table thead tr th {
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
