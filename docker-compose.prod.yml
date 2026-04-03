@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: orienteering_db_prod
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: orienteering
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # image: ghcr.io/your-github-username/orienteering-backend:latest
+    container_name: orienteering_backend_prod
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://admin:admin123@db:5432/orienteering?schema=public
+      - JWT_SECRET=change_this_to_a_secure_random_string!
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+      - CORS_ORIGIN=* # Change to http://your-domain.com in real production
+      - DEFAULT_LANGUAGE=el
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # image: ghcr.io/your-github-username/orienteering-frontend:latest
+    container_name: orienteering_frontend_prod
+    restart: always
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data_prod:
