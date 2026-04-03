@@ -1,0 +1,31 @@
+- [X] Predifine the username and passworf from the production docker compose
+- [X] Predifine the cors policies from docker compose
+- [X] Also add a link to copy for the leaderboard for the admin from the event
+- [X] Add dark mode funcitonality for everyone
+- [X] When a team scans a point make only for them the point to be like done somehow
+- [X] Add lefalet layers for topographic map and satelite map
+- [X] Add a page for admin to see logs for the event when a team scans a qr and such
+- [X] Add a map to show the teams on the map
+- [X] Add a public event leaderboard page for each event
+- [X] make the app more mobile friendly
+- [X] make the app more conhgirant for the ui
+- [X] Name the app name Oriento
+- [X] Create Readme md
+- [X] Create production docker compose
+- [X] make the app PWA and add a message to install
+- [X] Add database
+- [X] Poll backend to update the leaderboard
+- [X] Poll Backend to update the event status for teams
+- [X] When an event deletes delete points and teams logs and everything
+- [X] Open qr preview from checkpoints admin menu and add a download button on the card which will open
+- [X] Fit map for teams on the page because now it shows a vertical scroll which means it overflows the page
+- [X] make all buttons no-caps in the app
+- [X] add i18n
+- [ ] add more customaization for the events and checkpoints
+  - [ ] add a timer for the event if the admin wants
+  - [ ] add the ability to add or remove the feature for the team to show their location or not from the events settings
+- [X] always show the team location on the admin dashboard
+- [X] on activity feed map to center the map on the points shown 
+- [X] when a team scans all points show on the map that they are done and its time to go back to the starting point
+- [X] Relogin fucntionality and refresh jwt
+- [ ] make the logo compass emoticon
