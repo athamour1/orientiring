@@ -30,4 +30,4 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 EXPOSE 3000
 
 # Start command handles DB migrations, seeding, and starting the compiled app
-CMD ["sh", "-c", "npx prisma db push && npx ts-node seed.ts && node dist/main"]
+CMD ["sh", "-c", "npx prisma db push && npx ts-node seed.ts && node dist/src/main"]
