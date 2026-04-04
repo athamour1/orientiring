@@ -6,6 +6,8 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from '@prisma/client';
 import * as QRCode from 'qrcode';
 import type { Response } from 'express';
+import { CreateCheckpointDto } from './dto/create-checkpoint.dto';
+import { UpdateCheckpointDto } from './dto/update-checkpoint.dto';
 
 @Controller('admin/events/:eventId/checkpoints')
 export class CheckpointsController {
@@ -14,7 +16,7 @@ export class CheckpointsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post()
-  create(@Param('eventId') eventId: string, @Body() createCheckpointDto: any) {
+  create(@Param('eventId') eventId: string, @Body() createCheckpointDto: CreateCheckpointDto) {
     return this.checkpointsService.create(+eventId, createCheckpointDto);
   }
 
@@ -35,7 +37,7 @@ export class CheckpointsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCheckpointDto: any) {
+  update(@Param('id') id: string, @Body() updateCheckpointDto: UpdateCheckpointDto) {
     return this.checkpointsService.update(+id, updateCheckpointDto);
   }
 
@@ -54,7 +56,7 @@ export class CheckpointsController {
     if (!checkpoint) {
       return res.status(404).send('Checkpoint not found');
     }
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:9000';
+    const baseUrl = process.env.FRONTEND_URL;
     const deepLinkUrl = `${baseUrl}/#/team/scan?qr=${checkpoint.qrSecretString}`;
     const qrDataUrl = await QRCode.toDataURL(deepLinkUrl);
     const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, '');

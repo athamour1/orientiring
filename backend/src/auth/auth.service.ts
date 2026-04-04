@@ -29,8 +29,7 @@ export class AuthService {
 
   async refresh(token: string) {
     try {
-      const secret = process.env.JWT_SECRET || 'secretKey';
-      const decoded = this.jwtService.verify(token, { secret });
+      const decoded = this.jwtService.verify(token);
       const payload = { username: decoded.username, sub: decoded.sub, role: decoded.role };
       return { access_token: this.jwtService.sign(payload), role: decoded.role };
     } catch {
