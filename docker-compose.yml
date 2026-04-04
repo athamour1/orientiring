@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
       POSTGRES_DB: orienteering
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -20,15 +18,16 @@ services:
       - db
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - backend_node_modules:/app/node_modules
     ports:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://admin:admin123@db:5432/orienteering?schema=public
-      - JWT_SECRET=orientiring_secret_key_42
+      - JWT_SECRET=orientiring_dev_secret_key_42_dev
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin123
       - CORS_ORIGIN=http://localhost:9000,http://127.0.0.1:9000,http://localhost:9200,http://127.0.0.1:9200
+      - FRONTEND_URL=http://localhost:9000
       - DEFAULT_LANGUAGE=el
     command: sh -c "npm install && npx prisma generate && npx prisma db push && npx ts-node seed.ts && npm run start:dev"
 
@@ -38,16 +37,16 @@ services:
     working_dir: /app
     volumes:
       - ./frontend:/app
-      # Same strategy for isolating node_modules
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     ports:
       - "9000:9000"
       - "9200:9200"
-
     environment:
       - VITE_API_URL=http://localhost:3000
-      - CHOKIDAR_USEPOLLING=true # Ensures Vue/Vite hot-reloading reliably tracks file changes across the Docker volume boundary
-    # Quasar runs its dev server natively
+      - CHOKIDAR_USEPOLLING=true
     command: sh -c "npm install && npx quasar dev -m pwa -H 0.0.0.0"
+
 volumes:
   postgres_data:
+  backend_node_modules:
+  frontend_node_modules:
