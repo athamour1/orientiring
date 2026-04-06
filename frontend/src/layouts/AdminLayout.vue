@@ -95,7 +95,7 @@ const fetchEventsMenu = async () => {
     const res = await api.get('/admin/events')
     activeEvents.value = res.data
   } catch {
-    console.error('Failed fetching events for drawer menu')
+    // Non-critical — drawer menu will be empty
   }
 }
 

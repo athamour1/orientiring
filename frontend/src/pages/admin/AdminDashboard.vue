@@ -42,7 +42,7 @@
               :placeholder="$t('eventNamePlaceholder')"
               autofocus 
               outlined
-              :rules="[val => !!val || 'Event Name is required']" 
+              :rules="[val => !!val || t('eventNameRequired')]"
             />
             
             <q-input 
@@ -107,9 +107,8 @@ const fetchEvents = async () => {
   try {
     const res = await api.get('/admin/events')
     events.value = res.data
-  } catch (e) {
-    console.error('Failed to fetch events', e)
-    $q.notify({ color: 'negative', message: 'Failed to access database' })
+  } catch {
+    $q.notify({ color: 'negative', message: t('failedToLoadEvents') })
   }
 }
 
@@ -120,16 +119,15 @@ const createEvent = async () => {
     showNewEventDialog.value = false
     newEvent.value = { name: '', description: '', isActive: false }
     $q.notify({ color: 'positive', icon: 'rocket_launch', message: t('eventOrchestrated') })
-  } catch(e) {
-    console.error('Failed to create event', e)
-    $q.notify({ color: 'negative', icon: 'error', message: 'Server sequence negated the creation request.' })
+  } catch {
+    $q.notify({ color: 'negative', icon: 'error', message: t('failedToCreateEvent') })
   }
 }
 
 const confirmDeleteEvent = (eventRow) => {
   $q.dialog({
     title: t('confirmDeletion'),
-    message: `Are you completely sure you want to permanently wipe the event '${eventRow.name}'?`,
+    message: t('confirmWipeEventNamed', { name: eventRow.name }),
     color: 'negative',
     cancel: true,
     persistent: true
@@ -138,9 +136,8 @@ const confirmDeleteEvent = (eventRow) => {
       await api.delete(`/admin/events/${eventRow.id}`)
       $q.notify({ color: 'positive', message: t('eventWiped') })
       fetchEvents() // Update the table
-    } catch(e) {
-      console.warn(e)
-      $q.notify({ color: 'negative', message: 'Failed to delete event.' })
+    } catch {
+      $q.notify({ color: 'negative', message: t('failedToDeleteEvent') })
     }
   })
 }

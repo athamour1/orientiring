@@ -61,8 +61,8 @@ const fetchLeaderboard = async () => {
     const res = await api.get(`/public/events/${eventId}/leaderboard`)
     // Backend now returns { eventName, eventDescription, leaderboard }
     leaderboard.value = Array.isArray(res.data) ? res.data : res.data.leaderboard
-  } catch(e) {
-    console.error('Leaderboard load error:', e)
+  } catch {
+    // Non-critical polling failure — UI shows stale data
   }
 }
 

@@ -80,8 +80,7 @@ const onDetect = async (detectedCodes) => {
   }, 4000)
 }
 
-const onError = (error) => {
-  console.error(error)
+const onError = () => {
   isSuccess.value = false
   resultMessage.value = t('cameraAccessError')
   scanning.value = false

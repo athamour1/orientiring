@@ -146,8 +146,8 @@ const fetchAll = async () => {
     logs.value = logsRes.data
     renderCheckpoints(statsRes.data)
     renderTeams(locRes.data)
-  } catch(e) {
-    console.error(e)
+  } catch {
+    // Polling failure — next interval will retry
   }
   loading.value = false
 }

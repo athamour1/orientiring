@@ -72,8 +72,8 @@ const fetchLeaderboard = async () => {
     leaderboard.value = res.data.leaderboard
     eventName.value = res.data.eventName
     eventDescription.value = res.data.eventDescription
-  } catch(e) {
-    console.error('Leaderboard fetch error', e)
+  } catch {
+    // Non-critical polling failure — UI shows stale data
   }
 }
 

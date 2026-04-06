@@ -79,19 +79,17 @@ onMounted(async () => {
       description: res.data.description, 
       isActive: res.data.isActive 
     }
-  } catch (e) {
-    console.error(e)
-    $q.notify({ color: 'negative', message: 'Failed to load settings.' })
+  } catch {
+    $q.notify({ color: 'negative', message: t('failedToLoadSettings') })
   }
 })
 
 const updateEvent = async () => {
   try {
     await api.put(`/admin/events/${eventId}`, form.value)
-    $q.notify({ color: 'positive', icon: 'check_circle', message: 'Event Settings safely updated!' })
-  } catch (e) {
-    console.warn(e)
-    $q.notify({ color: 'negative', message: 'Failed to save settings.' })
+    $q.notify({ color: 'positive', icon: 'check_circle', message: t('settingsSaved') })
+  } catch {
+    $q.notify({ color: 'negative', message: t('failedToSaveSettings') })
   }
 }
 
@@ -108,9 +106,8 @@ const confirmDelete = () => {
       $q.notify({ color: 'positive', message: t('eventWiped') })
       router.push('/admin')
       setTimeout(() => window.location.reload(), 500)
-    } catch(e) {
-      console.warn(e)
-      $q.notify({ color: 'negative', message: 'Failed to delete event.' })
+    } catch {
+      $q.notify({ color: 'negative', message: t('failedToDeleteEvent') })
     }
   })
 }
