@@ -38,6 +38,18 @@ const bannerDismissed = ref(false)
 let watchId = null
 let eventInterval = null
 let initialMapFit = false
+let lastSentLat = null
+let lastSentLng = null
+let lastSentTime = 0
+
+function haversineMetres(lat1, lng1, lat2, lng2) {
+  const R = 6371000
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
 onMounted(async () => {
   const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' })
@@ -101,14 +113,21 @@ onMounted(async () => {
         userMarker.value.setLatLng([latitude, longitude])
       }
 
-      // Push position to backend silently
-      try {
-        await api.put('/team/events/location', { latitude, longitude })
-      } catch(e) {
-        console.warn('Location push failed', e)
+      // Push position to backend only when moved >10m or >4s since last send
+      const now = Date.now()
+      const movedEnough = lastSentLat === null ||
+        haversineMetres(lastSentLat, lastSentLng, latitude, longitude) > 10
+      const enoughTime = now - lastSentTime > 4000
+      if (movedEnough || enoughTime) {
+        try {
+          await api.put('/team/events/location', { latitude, longitude })
+          lastSentLat = latitude
+          lastSentLng = longitude
+          lastSentTime = now
+        } catch { /* silent — non-critical */ }
       }
       
-    }, (err) => console.warn(err), { enableHighAccuracy: true })
+    }, () => { /* GPS unavailable — user will see no location marker */ }, { enableHighAccuracy: true })
   }
 })
 
@@ -181,9 +200,8 @@ const fetchEvent = async () => {
     } else {
       $q.notify({ color: 'info', icon: 'info', message: t('noTargetsYet') })
     }
-  } catch(e) {
-    console.error('Failed to load map data', e)
-    $q.notify({ color: 'negative', icon: 'error', message: 'Failed to synchronize with server.' })
+  } catch {
+    $q.notify({ color: 'negative', icon: 'error', message: t('failedToSync') })
   }
 }
 </script>
