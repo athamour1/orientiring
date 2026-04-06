@@ -28,4 +28,12 @@
 - [X] on activity feed map to center the map on the points shown 
 - [X] when a team scans all points show on the map that they are done and its time to go back to the starting point
 - [X] Relogin fucntionality and refresh jwt
-- [ ] make the logo compass emoticon
+- [ ] Make the logo compass emoticon
+- [ ] Fix the activity monitor the map should show the points better becuase now with the transparency its a problem
+- [ ] Fix the colors on teams map blue where am i green when its scaned red when not also when the user presses the point show them the status also
+- [ ] Fix the camera tab for teams it should be bigger and leaner
+- [ ] Also let the admin to choose whenever the teams can see their location with the gps
+- [ ] Let the admin choose the points the first team they scan a point
+- [ ] Keep the teams route from the gps, show the amdin can confirm the points exploration route
+- [ ] fix the activity feed the location of the current team
+- [ ] fix the activity feed to filter the teams shown also let the amdin to choose to show the route a team took
