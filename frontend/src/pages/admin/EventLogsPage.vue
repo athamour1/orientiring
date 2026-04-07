@@ -166,6 +166,7 @@ function switchAdminBase(layer) {
   layer.tile.addTo(map)
   adminCurrentBase = layer.tile
   adminBaseName.value = layer.name
+  localStorage.setItem('adminMapLayer', layer.name)
 }
 
 function toggleOverlay(ov) {
@@ -413,7 +414,7 @@ onMounted(async () => {
     { name: 'route',       label: '🛤️ Route',       layer: routeLayer,      visible: true },
   ]
 
-  const initName = $q.dark.isActive ? 'dark' : 'street'
+  const initName = localStorage.getItem('adminMapLayer') || ($q.dark.isActive ? 'dark' : 'street')
   adminBaseName.value = initName
   adminCurrentBase = adminBaseLayers.value.find(l => l.name === initName).tile
   adminCurrentBase.addTo(map)

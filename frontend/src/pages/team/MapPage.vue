@@ -112,6 +112,7 @@ function switchBase(layer) {
   layer.tile.addTo(map.value)
   currentBaseTile = layer.tile
   activeBaseName.value = layer.name
+  localStorage.setItem('mapLayer', layer.name)
 }
 let watchId = null
 let eventInterval = null
@@ -182,7 +183,7 @@ onMounted(async () => {
     { name: 'dark',      label: '🌙 Dark',         tile: dark },
   ]
 
-  const initialName = $q.dark.isActive ? 'dark' : 'street'
+  const initialName = localStorage.getItem('mapLayer') || ($q.dark.isActive ? 'dark' : 'street')
   activeBaseName.value = initialName
   const initialLayer = baseLayers.value.find(l => l.name === initialName).tile
 

@@ -133,6 +133,7 @@ function switchBase(layer) {
   layer.tile.addTo(map)
   currentBaseTile = layer.tile
   activeBaseName.value = layer.name
+  localStorage.setItem('adminMapLayer', layer.name)
 }
 
 const columns = computed(() => [
@@ -161,7 +162,7 @@ onMounted(async () => {
     { name: 'dark',      label: '🌙 Dark',         tile: darkTile },
   ]
 
-  const initName = $q.dark.isActive ? 'dark' : 'street'
+  const initName = localStorage.getItem('adminMapLayer') || ($q.dark.isActive ? 'dark' : 'street')
   activeBaseName.value = initName
   currentBaseTile = baseLayers.value.find(l => l.name === initName).tile
   currentBaseTile.addTo(map)
