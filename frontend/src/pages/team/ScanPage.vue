@@ -98,6 +98,8 @@ const onError = () => {
   inset: 0;
   background: #000;
   overflow: hidden;
+  /* Quasar adds padding-bottom for the footer — remove it */
+  padding: 0 !important;
 }
 
 /* Camera fills the whole page */
@@ -138,12 +140,13 @@ const onError = () => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.85);
-  padding: 12px 20px;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.88);
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
+  min-height: 56px;
 }
 
 .result-pill {
