@@ -13,6 +13,24 @@
         <q-btn round elevated color="white" text-color="dark" icon="add" size="sm" @click="map && map.zoomIn()" />
         <q-btn round elevated color="white" text-color="dark" icon="remove" size="sm" @click="map && map.zoomOut()" />
       </div>
+      <div class="admin-layer-btn">
+        <q-btn round elevated icon="layers" color="white" text-color="grey-8" size="sm">
+          <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
+            <q-list dense style="min-width:160px; padding: 6px;">
+              <q-item
+                v-for="layer in baseLayers"
+                :key="layer.name"
+                clickable
+                @click="switchBase(layer)"
+                v-close-popup
+                :class="['layer-item', { 'layer-item--active': activeBaseName === layer.name }]"
+              >
+                <q-item-section>{{ layer.label }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
     </q-card>
 
     <!-- Checkpoints Table -->
@@ -82,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, nextTick, computed, watch } from 'vue'
 import { api } from 'boot/axios'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -104,7 +122,18 @@ const previewDialog = ref(false)
 const previewCp = ref(null)
 const previewUrl = ref('')
 const form = ref({ name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
+const baseLayers = ref([])
+const activeBaseName = ref('street')
+let currentBaseTile = null
 let map = null
+
+function switchBase(layer) {
+  if (!map || !layer) return
+  if (currentBaseTile) map.removeLayer(currentBaseTile)
+  layer.tile.addTo(map)
+  currentBaseTile = layer.tile
+  activeBaseName.value = layer.name
+}
 
 const columns = computed(() => [
   { name: 'name', required: true, label: t('name'), align: 'left', field: 'name', sortable: true },
@@ -119,7 +148,27 @@ onMounted(async () => {
   L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow })
   await nextTick()
   map = L.map('admin-map', { doubleClickZoom: false, zoomControl: false }).setView([0, 0], 2)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+
+  const streetTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' })
+  const topoTile = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenTopoMap' })
+  const satelliteTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: '© Esri' })
+  const darkTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© CartoDB', className: 'dark-tiles' })
+
+  baseLayers.value = [
+    { name: 'street',    label: '🗺️ Street',      tile: streetTile },
+    { name: 'topo',      label: '⛰️ Topographic', tile: topoTile },
+    { name: 'satellite', label: '🛰️ Satellite',   tile: satelliteTile },
+    { name: 'dark',      label: '🌙 Dark',         tile: darkTile },
+  ]
+
+  const initName = $q.dark.isActive ? 'dark' : 'street'
+  activeBaseName.value = initName
+  currentBaseTile = baseLayers.value.find(l => l.name === initName).tile
+  currentBaseTile.addTo(map)
+
+  watch(() => $q.dark.isActive, (isDark) => {
+    switchBase(baseLayers.value.find(l => l.name === (isDark ? 'dark' : 'street')))
+  })
   map.on('dblclick', (e) => {
     form.value.latitude = Number(e.latlng.lat.toFixed(6))
     form.value.longitude = Number(e.latlng.lng.toFixed(6))
@@ -226,5 +275,11 @@ const confirmDelete = (cp) => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.admin-layer-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
 }
 </style>
