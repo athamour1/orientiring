@@ -99,12 +99,14 @@ const onError = () => {
 .scan-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  max-height: 100dvh;
   background: #000;
   overflow: hidden;
-  position: fixed;
-  inset: 0;
+  /* Fill the q-page area (excludes header + tab bar) */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .camera-area {
