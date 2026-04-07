@@ -138,13 +138,12 @@ const onError = () => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
-  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 52px;
 }
 
 .result-pill {
@@ -157,9 +156,9 @@ const onError = () => {
 .result-error   { background: rgba(229,57,53,0.3);  color: #ef9a9a; }
 
 .hint-text {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   line-height: 1.4;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s; }
