@@ -37,6 +37,11 @@ model Event {
   language          String       @default("en-US")
   firstFinishBonus  Int          @default(0)
   firstFinishBonusAwardedToId Int?
+  startLat          Float?
+  startLng          Float?
+  returnLat         Float?
+  returnLng         Float?
+  returnSameAsStart Boolean      @default(true)
 
   checkpoints Checkpoint[]
   teams       User[]

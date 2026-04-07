@@ -107,6 +107,61 @@
       <div v-if="copied" class="text-positive text-caption q-mt-sm">{{ $t('linkCopiedToClipboard') }}</div>
     </q-card>
 
+    <!-- Start / Return points -->
+    <q-card flat bordered class="q-pa-md shadow-2 q-mb-lg">
+      <div class="row items-center q-mb-sm">
+        <q-icon name="flag" color="primary" class="q-mr-sm" />
+        <div class="text-subtitle1 text-weight-bold">{{ $t('startReturnPoints') }}</div>
+      </div>
+      <div class="text-caption text-grey-7 q-mb-md">{{ $t('startReturnDesc') }}</div>
+
+      <div class="row q-gutter-sm q-mb-sm">
+        <q-btn-toggle
+          v-model="pointMode"
+          unelevated rounded
+          toggle-color="primary"
+          :options="[
+            { label: $t('setStartPoint'), value: 'start' },
+            { label: $t('setReturnPoint'), value: 'return' },
+          ]"
+          :disable="pointMode === 'return' && form.returnSameAsStart"
+        />
+      </div>
+
+      <q-toggle
+        v-model="form.returnSameAsStart"
+        :label="$t('returnSameAsStart')"
+        color="primary"
+        class="q-mb-sm"
+        @update:model-value="onReturnSameToggle"
+      />
+
+      <div class="text-caption text-grey-7 q-mb-xs">{{ $t('clickMapToSet') }}</div>
+
+      <div style="position: relative; border-radius: 12px; overflow: hidden;">
+        <div id="points-map" style="height: 280px; width: 100%;"></div>
+        <div class="points-zoom-btns">
+          <q-btn round elevated color="white" text-color="dark" icon="add" size="sm" @click="pointsMap && pointsMap.zoomIn()" />
+          <q-btn round elevated color="white" text-color="dark" icon="remove" size="sm" @click="pointsMap && pointsMap.zoomOut()" />
+        </div>
+      </div>
+
+      <div class="row q-mt-sm q-gutter-md text-caption">
+        <div class="row items-center q-gutter-xs">
+          <div style="width:12px;height:12px;border-radius:50%;background:#43a047;"></div>
+          <span>{{ $t('startPoint') }}: {{ form.startLat ? `${form.startLat}, ${form.startLng}` : $t('notSet') }}</span>
+        </div>
+        <div v-if="!form.returnSameAsStart" class="row items-center q-gutter-xs">
+          <div style="width:12px;height:12px;border-radius:50%;background:#e53935;"></div>
+          <span>{{ $t('returnPoint') }}: {{ form.returnLat ? `${form.returnLat}, ${form.returnLng}` : $t('notSet') }}</span>
+        </div>
+        <div v-else class="row items-center q-gutter-xs text-grey-6">
+          <q-icon name="sync" size="12px" />
+          <span>{{ $t('returnSameAsStartShort') }}</span>
+        </div>
+      </div>
+    </q-card>
+
     <q-btn unelevated color="primary" :label="$t('saveChanges')" @click="updateEvent" class="full-width q-mb-lg" size="lg" no-caps />
 
     <q-card flat bordered class="q-pa-md border-red">
@@ -118,12 +173,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useEventsStore } from 'src/stores/events'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 const eventsStore = useEventsStore()
 
 const $q = useQuasar()
@@ -139,7 +196,48 @@ const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
 
-const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null, language: 'en-US', firstFinishBonus: 0 })
+const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null, language: 'en-US', firstFinishBonus: 0, startLat: null, startLng: null, returnLat: null, returnLng: null, returnSameAsStart: true })
+const pointMode = ref('start')
+let pointsMap = null
+let startMarker = null
+let returnMarker = null
+
+const startIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#43a047;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })
+const returnIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#e53935;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })
+
+function placeMarker(latlng, type) {
+  if (type === 'start') {
+    if (startMarker) pointsMap.removeLayer(startMarker)
+    startMarker = L.marker(latlng, { icon: startIcon }).addTo(pointsMap)
+    form.value.startLat = Number(latlng.lat.toFixed(6))
+    form.value.startLng = Number(latlng.lng.toFixed(6))
+    if (form.value.returnSameAsStart) {
+      form.value.returnLat = form.value.startLat
+      form.value.returnLng = form.value.startLng
+    }
+  } else {
+    if (returnMarker) pointsMap.removeLayer(returnMarker)
+    returnMarker = L.marker(latlng, { icon: returnIcon }).addTo(pointsMap)
+    form.value.returnLat = Number(latlng.lat.toFixed(6))
+    form.value.returnLng = Number(latlng.lng.toFixed(6))
+  }
+}
+
+function onReturnSameToggle(val) {
+  if (val) {
+    if (returnMarker) { pointsMap.removeLayer(returnMarker); returnMarker = null }
+    form.value.returnLat = form.value.startLat
+    form.value.returnLng = form.value.startLng
+    pointMode.value = 'start'
+  }
+}
+
+function initPointsMap() {
+  pointsMap = L.map('points-map', { zoomControl: false }).setView([38.0, 23.7], 11)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(pointsMap)
+  pointsMap.on('click', (e) => placeMarker(e.latlng, form.value.returnSameAsStart ? 'start' : pointMode.value))
+  setTimeout(() => pointsMap.invalidateSize(), 150)
+}
 const copied = ref(false)
 const publicUrl = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
 
@@ -170,10 +268,26 @@ onMounted(async () => {
       endTime: toLocalInput(res.data.endTime),
       language: lang,
       firstFinishBonus: res.data.firstFinishBonus ?? 0,
+      startLat: res.data.startLat ?? null,
+      startLng: res.data.startLng ?? null,
+      returnLat: res.data.returnLat ?? null,
+      returnLng: res.data.returnLng ?? null,
+      returnSameAsStart: res.data.returnSameAsStart ?? true,
     }
-    // Sync the local toggle and apply locale immediately
     appLang.value = lang
     applyLang(lang)
+
+    await nextTick()
+    initPointsMap()
+
+    // Restore existing markers
+    if (form.value.startLat) {
+      startMarker = L.marker([form.value.startLat, form.value.startLng], { icon: startIcon }).addTo(pointsMap)
+      pointsMap.setView([form.value.startLat, form.value.startLng], 14)
+    }
+    if (!form.value.returnSameAsStart && form.value.returnLat) {
+      returnMarker = L.marker([form.value.returnLat, form.value.returnLng], { icon: returnIcon }).addTo(pointsMap)
+    }
   } catch (err) { console.error(err) }
 })
 
@@ -214,4 +328,13 @@ const confirmDelete = () => {
 .tracking-tight { letter-spacing: -0.02em; }
 .max-w-md { max-width: 600px; }
 .border-red { border-color: rgba(var(--q-negative), 0.2); }
+.points-zoom-btns {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 </style>
