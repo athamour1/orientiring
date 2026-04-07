@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { api } from 'boot/axios'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
