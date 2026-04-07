@@ -107,6 +107,8 @@ import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import { useEventsStore } from 'src/stores/events'
+const eventsStore = useEventsStore()
 
 const $q = useQuasar()
 const { t, locale } = useI18n()
@@ -182,6 +184,7 @@ const confirmDelete = () => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventId}`)
+      eventsStore.removeEvent(Number(eventId))
       router.push('/admin')
       setTimeout(() => window.location.reload(), 500)
     } catch (err) { console.error(err) }

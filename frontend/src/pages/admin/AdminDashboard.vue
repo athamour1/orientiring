@@ -67,16 +67,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { api } from 'boot/axios'
+import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import { useEventsStore } from 'src/stores/events'
 
 const $q = useQuasar()
 const { t } = useI18n()
-const events = ref([])
+const store = useEventsStore()
+const events = computed(() => store.events)
 const showNewEventDialog = ref(false)
 const newEvent = ref({ name: '', description: '', isActive: false })
+
+onMounted(() => { if (!store.loaded) store.fetchEvents() })
 
 const copyLeaderboardLink = (eventId) => {
   const url = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
@@ -90,21 +93,13 @@ const columns = computed(() => [
   { name: 'actions', label: t('actions'), align: 'right' }
 ])
 
-onMounted(() => { fetchEvents() })
-
-const fetchEvents = async () => {
-  try {
-    const res = await api.get('/admin/events')
-    events.value = res.data
-  } catch (err) { console.error(err) }
-}
-
 const createEvent = async () => {
   try {
     const res = await api.post('/admin/events', newEvent.value)
-    events.value.push(res.data)
+    store.addEvent(res.data)
     showNewEventDialog.value = false
     newEvent.value = { name: '', description: '', isActive: false }
+    $q.notify({ type: 'positive', message: t('eventOrchestrated'), position: 'top-right', timeout: 2500 })
   } catch (err) { console.error(err) }
 }
 
@@ -118,7 +113,8 @@ const confirmDeleteEvent = (eventRow) => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventRow.id}`)
-      fetchEvents()
+      store.removeEvent(eventRow.id)
+      $q.notify({ type: 'positive', message: t('eventWiped'), position: 'top-right', timeout: 2500 })
     } catch (err) { console.error(err) }
   })
 }

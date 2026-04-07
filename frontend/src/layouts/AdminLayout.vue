@@ -68,38 +68,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { api } from 'boot/axios'
+import { useEventsStore } from 'src/stores/events'
 import { usePwaInstall } from 'src/composables/usePwaInstall'
 
 const $q = useQuasar()
 const leftDrawerOpen = ref(false)
 const router = useRouter()
-const activeEvents = ref([])
+const store = useEventsStore()
+const activeEvents = computed(() => store.events)
 const { isInstallable, promptInstall } = usePwaInstall()
 
-const toggleLeftDrawer = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
+const toggleLeftDrawer = () => { leftDrawerOpen.value = !leftDrawerOpen.value }
 
 const toggleDark = () => {
   $q.dark.toggle()
   localStorage.setItem('darkMode', $q.dark.isActive)
 }
 
-const fetchEventsMenu = async () => {
-  try {
-    const res = await api.get('/admin/events')
-    activeEvents.value = res.data
-  } catch {
-    // Non-critical — drawer menu will be empty
-  }
-}
-
 onMounted(() => {
-  fetchEventsMenu()
+  if (!store.loaded) store.fetchEvents()
 })
 
 const logout = () => {
