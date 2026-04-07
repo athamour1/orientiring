@@ -148,7 +148,7 @@ const fetchCheckpoints = async () => {
       const group = new L.featureGroup(markers);
       map.fitBounds(group.getBounds().pad(0.1));
     }
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const getCurrentLocation = () => {
@@ -156,7 +156,7 @@ const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(pos => {
       form.value.latitude = pos.coords.latitude
       form.value.longitude = pos.coords.longitude
-    }, () => { /* silent */ })
+    }, (err) => { console.error(err) })
   }
 }
 
@@ -166,7 +166,7 @@ const createCheckpoint = async () => {
     showDialog.value = false
     form.value = { name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 }
     fetchCheckpoints()
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const openQrPreview = async (cp) => {
@@ -175,7 +175,7 @@ const openQrPreview = async (cp) => {
     previewUrl.value = window.URL.createObjectURL(new Blob([res.data], { type: 'image/png' }))
     previewCp.value = cp
     previewDialog.value = true
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const downloadVisibleQr = () => {
@@ -220,7 +220,7 @@ const confirmDelete = (cp) => {
     try {
       await api.delete(`/admin/events/${eventId}/checkpoints/${cp.id}`)
       fetchCheckpoints()
-    } catch { /* silent */ }
+    } catch (err) { console.error(err) }
   })
 }
 </script>

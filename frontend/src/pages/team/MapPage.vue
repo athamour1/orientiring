@@ -221,9 +221,9 @@ const fetchEvent = async () => {
           initialMapFit = true
         }, 200)
       }
-    } else {
     }
-  } catch {
+  } catch (err) {
+    console.error(err)
   }
 }
 </script>

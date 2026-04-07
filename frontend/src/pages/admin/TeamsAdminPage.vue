@@ -64,7 +64,7 @@ const fetchTeams = async () => {
   try {
     const res = await api.get(`/admin/events/${eventId}/teams`)
     teams.value = res.data
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 onMounted(() => {
@@ -93,7 +93,7 @@ const confirmDelete = (team) => {
     try {
       await api.delete(`/admin/events/${eventId}/teams/${team.id}`)
       fetchTeams()
-    } catch { /* silent */ }
+    } catch (err) { console.error(err) }
   })
 }
 </script>

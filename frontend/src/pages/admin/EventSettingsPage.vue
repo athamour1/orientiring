@@ -126,7 +126,7 @@ onMounted(async () => {
       startTime: toLocalInput(res.data.startTime),
       endTime: toLocalInput(res.data.endTime),
     }
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 })
 
 const updateEvent = async () => {
@@ -136,7 +136,7 @@ const updateEvent = async () => {
       startTime: form.value.startTime ? new Date(form.value.startTime).toISOString() : null,
       endTime: form.value.endTime ? new Date(form.value.endTime).toISOString() : null,
     })
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const confirmDelete = () => {
@@ -151,7 +151,7 @@ const confirmDelete = () => {
       await api.delete(`/admin/events/${eventId}`)
       router.push('/admin')
       setTimeout(() => window.location.reload(), 500)
-    } catch { /* silent */ }
+    } catch (err) { console.error(err) }
   })
 }
 </script>

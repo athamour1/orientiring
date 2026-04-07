@@ -106,7 +106,7 @@ const fetchEvents = async () => {
   try {
     const res = await api.get('/admin/events')
     events.value = res.data
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const createEvent = async () => {
@@ -115,7 +115,7 @@ const createEvent = async () => {
     events.value.push(res.data)
     showNewEventDialog.value = false
     newEvent.value = { name: '', description: '', isActive: false }
-  } catch { /* silent */ }
+  } catch (err) { console.error(err) }
 }
 
 const confirmDeleteEvent = (eventRow) => {
@@ -129,7 +129,7 @@ const confirmDeleteEvent = (eventRow) => {
     try {
       await api.delete(`/admin/events/${eventRow.id}`)
       fetchEvents()
-    } catch { /* silent */ }
+    } catch (err) { console.error(err) }
   })
 }
 </script>
