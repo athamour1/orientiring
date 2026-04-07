@@ -97,11 +97,6 @@ const onSubmit = async () => {
     } else {
       router.push('/team/map')
     }
-    $q.notify({
-      color: 'positive',
-      icon: 'check',
-      message: t('loginSuccessful')
-    })
   } catch (err) {
     let msg = t('authFailed')
     if (err.response && err.response.data && err.response.data.message) {
