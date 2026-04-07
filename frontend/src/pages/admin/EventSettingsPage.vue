@@ -126,9 +126,7 @@ onMounted(async () => {
       startTime: toLocalInput(res.data.startTime),
       endTime: toLocalInput(res.data.endTime),
     }
-  } catch {
-    $q.notify({ color: 'negative', message: t('failedToLoadSettings') })
-  }
+  } catch { /* silent */ }
 })
 
 const updateEvent = async () => {
@@ -138,10 +136,7 @@ const updateEvent = async () => {
       startTime: form.value.startTime ? new Date(form.value.startTime).toISOString() : null,
       endTime: form.value.endTime ? new Date(form.value.endTime).toISOString() : null,
     })
-    $q.notify({ color: 'positive', icon: 'check_circle', message: t('settingsSaved') })
-  } catch {
-    $q.notify({ color: 'negative', message: t('failedToSaveSettings') })
-  }
+  } catch { /* silent */ }
 }
 
 const confirmDelete = () => {
@@ -154,12 +149,9 @@ const confirmDelete = () => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventId}`)
-      $q.notify({ color: 'positive', message: t('eventWiped') })
       router.push('/admin')
       setTimeout(() => window.location.reload(), 500)
-    } catch {
-      $q.notify({ color: 'negative', message: t('failedToDeleteEvent') })
-    }
+    } catch { /* silent */ }
   })
 }
 </script>

@@ -162,7 +162,7 @@ const fetchEvent = async () => {
     }
 
     if (!activeEvent.value || activeEvent.value === '') {
-      return $q.notify({ color: 'warning', icon: 'warning', message: t('noActiveEvent') })
+      return
     }
 
     if (activeEvent.value.checkpoints && activeEvent.value.checkpoints.length > 0) {
@@ -222,10 +222,8 @@ const fetchEvent = async () => {
         }, 200)
       }
     } else {
-      $q.notify({ color: 'info', icon: 'info', message: t('noTargetsYet') })
     }
   } catch {
-    $q.notify({ color: 'negative', icon: 'error', message: t('failedToSync') })
   }
 }
 </script>

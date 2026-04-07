@@ -89,7 +89,6 @@ const newEvent = ref({
 const copyLeaderboardLink = (eventId) => {
   const url = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
   navigator.clipboard.writeText(url)
-  $q.notify({ color: 'teal', icon: 'content_copy', message: t('publicLinkCopied') })
 }
 
 const columns = computed(() => [
@@ -107,9 +106,7 @@ const fetchEvents = async () => {
   try {
     const res = await api.get('/admin/events')
     events.value = res.data
-  } catch {
-    $q.notify({ color: 'negative', message: t('failedToLoadEvents') })
-  }
+  } catch { /* silent */ }
 }
 
 const createEvent = async () => {
@@ -118,10 +115,7 @@ const createEvent = async () => {
     events.value.push(res.data)
     showNewEventDialog.value = false
     newEvent.value = { name: '', description: '', isActive: false }
-    $q.notify({ color: 'positive', icon: 'rocket_launch', message: t('eventOrchestrated') })
-  } catch {
-    $q.notify({ color: 'negative', icon: 'error', message: t('failedToCreateEvent') })
-  }
+  } catch { /* silent */ }
 }
 
 const confirmDeleteEvent = (eventRow) => {
@@ -134,11 +128,8 @@ const confirmDeleteEvent = (eventRow) => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventRow.id}`)
-      $q.notify({ color: 'positive', message: t('eventWiped') })
-      fetchEvents() // Update the table
-    } catch {
-      $q.notify({ color: 'negative', message: t('failedToDeleteEvent') })
-    }
+      fetchEvents()
+    } catch { /* silent */ }
   })
 }
 </script>

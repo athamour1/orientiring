@@ -64,9 +64,7 @@ const fetchTeams = async () => {
   try {
     const res = await api.get(`/admin/events/${eventId}/teams`)
     teams.value = res.data
-  } catch {
-    $q.notify({ color: 'negative', message: 'Failed to fetch teams' })
-  }
+  } catch { /* silent */ }
 }
 
 onMounted(() => {
@@ -76,13 +74,12 @@ onMounted(() => {
 const createTeam = async () => {
   try {
     await api.post(`/admin/events/${eventId}/teams`, form.value)
-    $q.notify({ color: 'positive', message: 'Team successfully registered!' })
     showDialog.value = false
     form.value = { username: '', password: '' }
     fetchTeams()
   } catch(e) {
     const msg = e.response?.data?.message || 'Error creating team'
-    $q.notify({ color: 'negative', message: msg })
+    void msg
   }
 }
 
@@ -95,11 +92,8 @@ const confirmDelete = (team) => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventId}/teams/${team.id}`)
-      $q.notify({ color: 'positive', message: 'Team deleted successfully.' })
       fetchTeams()
-    } catch {
-      $q.notify({ color: 'negative', message: 'Failed to delete team.' })
-    }
+    } catch { /* silent */ }
   })
 }
 </script>

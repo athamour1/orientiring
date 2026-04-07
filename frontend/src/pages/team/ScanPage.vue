@@ -52,6 +52,8 @@ onMounted(() => {
   }
 })
 
+const notify = (opts) => $q.notify({ position: 'top-right', timeout: 3500, ...opts })
+
 const processScan = async (qrSecretString) => {
   try {
     const res = await api.post('/team/scans', { qrSecretString })
@@ -60,15 +62,22 @@ const processScan = async (qrSecretString) => {
     const cpPoints = res.data.checkpoint?.pointValue || 10
     const bonus = res.data.bonusAwarded || 0
     resultMessage.value = t('targetAcquired', { cpName, points: cpPoints + bonus })
-    const msg = bonus > 0
-      ? t('firstScanBonus', { bonus })
-      : t('checkpointSuccessfullyValidated')
-    $q.notify({ color: bonus > 0 ? 'warning' : 'positive', icon: bonus > 0 ? 'stars' : 'emoji_events', message: msg })
-  } catch(err) {
+    if (bonus > 0) {
+      notify({ color: 'warning', icon: 'stars', message: t('firstScanBonus', { bonus }) })
+    } else {
+      notify({ color: 'positive', icon: 'emoji_events', message: t('checkpointSuccessfullyValidated') })
+    }
+  } catch (err) {
     isSuccess.value = false
+    const status = err.response?.status
     const msg = err.response?.data?.message || t('validationFailed')
     resultMessage.value = msg
-    $q.notify({ color: 'negative', icon: 'error', message: msg })
+    if (status === 409) {
+      // Already scanned this checkpoint
+      notify({ color: 'orange', icon: 'replay', message: t('alreadyScanned') })
+    } else {
+      notify({ color: 'negative', icon: 'error', message: t('validationFailed') })
+    }
   }
 }
 

@@ -148,9 +148,7 @@ const fetchCheckpoints = async () => {
       const group = new L.featureGroup(markers);
       map.fitBounds(group.getBounds().pad(0.1));
     }
-  } catch { 
-    $q.notify({ color: 'negative', message: 'Failed to fetch checkpoints.' })
-  }
+  } catch { /* silent */ }
 }
 
 const getCurrentLocation = () => {
@@ -158,23 +156,17 @@ const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(pos => {
       form.value.latitude = pos.coords.latitude
       form.value.longitude = pos.coords.longitude
-      $q.notify({ color: 'positive', message: 'GPS coordinates locked!' })
-    }, () => {
-      $q.notify({ color: 'negative', message: 'GPS permission denied or unavailable.' })
-    })
+    }, () => { /* silent */ })
   }
 }
 
 const createCheckpoint = async () => {
   try {
     await api.post(`/admin/events/${eventId}/checkpoints`, form.value)
-    $q.notify({ color: 'positive', message: 'Checkpoint deployed!' })
     showDialog.value = false
     form.value = { name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 }
     fetchCheckpoints()
-  } catch {
-    $q.notify({ color: 'negative', message: 'Failed to deploy checkpoint' })
-  }
+  } catch { /* silent */ }
 }
 
 const openQrPreview = async (cp) => {
@@ -183,9 +175,7 @@ const openQrPreview = async (cp) => {
     previewUrl.value = window.URL.createObjectURL(new Blob([res.data], { type: 'image/png' }))
     previewCp.value = cp
     previewDialog.value = true
-  } catch {
-    $q.notify({ color: 'negative', message: 'Error retrieving QR Code' })
-  }
+  } catch { /* silent */ }
 }
 
 const downloadVisibleQr = () => {
@@ -215,10 +205,8 @@ const downloadAllQr = async () => {
     link.click()
     
     $q.loading.hide()
-    $q.notify({ color: 'positive', message: 'Archive mapped and downloaded!' })
   } catch {
     $q.loading.hide()
-    $q.notify({ color: 'negative', message: 'Failed to compile Zip archive.' })
   }
 }
 
@@ -231,11 +219,8 @@ const confirmDelete = (cp) => {
   }).onOk(async () => {
     try {
       await api.delete(`/admin/events/${eventId}/checkpoints/${cp.id}`)
-      $q.notify({ color: 'positive', message: 'Checkpoint deleted.' })
-      fetchCheckpoints() // Refresh UI
-    } catch {
-      $q.notify({ color: 'negative', message: 'Failed to delete checkpoint.' })
-    }
+      fetchCheckpoints()
+    } catch { /* silent */ }
   })
 }
 </script>
