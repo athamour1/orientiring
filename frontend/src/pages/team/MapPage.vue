@@ -26,7 +26,7 @@
       :text-color="followMode ? 'white' : 'primary'"
       size="md"
       class="locate-btn shadow-4"
-      :disable="!lastSentLat"
+      :disable="!gpsReady"
       @click="locateMe"
     />
 
@@ -77,6 +77,7 @@ const gpsBlocked = ref(false)
 const gpsPermissionDenied = ref(false)
 const gpsRetrying = ref(false)
 const followMode = ref(false)
+const gpsReady = ref(false)
 let watchId = null
 let eventInterval = null
 let initialMapFit = false
@@ -218,6 +219,7 @@ async function onPosition(pos) {
     haversineMetres(lastSentLat, lastSentLng, latitude, longitude) > 10
   const enoughTime = now - lastSentTime > 4000
   if (movedEnough || enoughTime) {
+    gpsReady.value = true
     locationSocket?.emit('location:update', { latitude, longitude })
     lastSentLat = latitude
     lastSentLng = longitude
