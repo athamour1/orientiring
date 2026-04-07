@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-lg max-w-md mx-auto">
+  <q-page class="q-pa-lg admin-page max-w-md mx-auto">
     <div class="row items-center q-mb-xl">
       <q-btn flat round icon="arrow_back" color="grey-8" @click="$router.back()" class="q-mr-sm" />
       <div class="text-h5 text-weight-bold tracking-tight">{{ $t('eventSettings') }}</div>
@@ -191,6 +191,7 @@ const confirmDelete = () => {
 </script>
 
 <style scoped>
+.admin-page { max-width: 900px; margin: 0 auto; }
 .tracking-tight { letter-spacing: -0.02em; }
 .max-w-md { max-width: 600px; }
 .border-red { border-color: rgba(var(--q-negative), 0.2); }

@@ -1,66 +1,62 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
+  <q-page class="q-pa-lg admin-page">
+    <div class="row items-center q-mb-xl">
       <div class="text-h5 text-weight-bold tracking-tight">{{ $t('activeEvents') }}</div>
       <q-space />
       <q-btn color="primary" icon="add" :label="$t('newEvent')" unelevated no-caps @click="showNewEventDialog = true" />
     </div>
 
-    <q-table
-      :rows="events"
-      :columns="columns"
-      row-key="id"
-      flat bordered
-      class="shadow-2"
-    >
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn flat round color="primary" dense icon="settings" @click="$router.push(`/admin/events/${props.row.id}`)">
-            <q-tooltip>{{ $t('manage') }}</q-tooltip>
-          </q-btn>
-          <q-btn flat round color="teal" dense icon="share" class="q-ml-xs" @click="copyLeaderboardLink(props.row.id)">
-            <q-tooltip>{{ $t('copyPublicLink') }}</q-tooltip>
-          </q-btn>
-          <q-btn flat round color="negative" dense icon="delete" class="q-ml-xs" @click="confirmDeleteEvent(props.row)" />
-        </q-td>
-      </template>
-    </q-table>
+    <q-card flat bordered class="shadow-2">
+      <q-table
+        :rows="events"
+        :columns="columns"
+        row-key="id"
+        flat
+        class="admin-table"
+      >
+        <template v-slot:body-cell-actions="props">
+          <q-td :props="props">
+            <q-btn flat round color="primary" dense icon="settings" @click="$router.push(`/admin/events/${props.row.id}`)">
+              <q-tooltip>{{ $t('manage') }}</q-tooltip>
+            </q-btn>
+            <q-btn flat round color="secondary" dense icon="share" class="q-ml-xs" @click="copyLeaderboardLink(props.row.id)">
+              <q-tooltip>{{ $t('copyPublicLink') }}</q-tooltip>
+            </q-btn>
+            <q-btn flat round color="negative" dense icon="delete" class="q-ml-xs" @click="confirmDeleteEvent(props.row)" />
+          </q-td>
+        </template>
+      </q-table>
+    </q-card>
 
     <!-- New Event Modal -->
     <q-dialog v-model="showNewEventDialog">
-      <q-card style="min-width: 350px" class="rounded-borders q-pa-sm">
+      <q-card style="min-width: 380px" class="q-pa-sm">
         <q-card-section>
           <div class="text-h6 text-weight-bold tracking-tight">{{ $t('createEventTitle') }}</div>
-          <div class="text-subtitle2 text-grey-7">{{ $t('defineParameters') }}</div>
+          <div class="text-caption text-grey-7">{{ $t('defineParameters') }}</div>
         </q-card-section>
-
         <q-card-section class="q-pt-none">
           <q-form @submit="createEvent" class="q-gutter-md">
-            <q-input 
-              v-model="newEvent.name" 
-              :label="$t('eventName')" 
+            <q-input
+              v-model="newEvent.name"
+              :label="$t('eventName')"
               :placeholder="$t('eventNamePlaceholder')"
-              autofocus 
-              outlined
+              autofocus outlined
               :rules="[val => !!val || t('eventNameRequired')]"
             />
-            
-            <q-input 
-              v-model="newEvent.description" 
-              :label="$t('eventDesc')" 
-              type="textarea" 
-              outlined
-              autogrow 
+            <q-input
+              v-model="newEvent.description"
+              :label="$t('eventDesc')"
+              type="textarea" outlined autogrow
             />
-            
-            <q-toggle 
-              v-model="newEvent.isActive" 
-              :label="$t('activateImmediately')" 
-              color="positive" 
+            <q-toggle
+              v-model="newEvent.isActive"
+              :label="$t('activateImmediately')"
+              checked-icon="check" unchecked-icon="clear"
+              color="positive" size="lg"
             />
-
-            <div class="row justify-end q-mt-lg">
-              <q-btn flat :label="$t('cancel')" color="grey-8" v-close-popup class="q-mr-sm" no-caps />
+            <div class="row justify-end q-mt-lg q-gutter-sm">
+              <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
               <q-btn unelevated :label="$t('deployEvent')" color="primary" type="submit" no-caps />
             </div>
           </q-form>
@@ -80,11 +76,7 @@ const $q = useQuasar()
 const { t } = useI18n()
 const events = ref([])
 const showNewEventDialog = ref(false)
-const newEvent = ref({
-  name: '',
-  description: '',
-  isActive: false
-})
+const newEvent = ref({ name: '', description: '', isActive: false })
 
 const copyLeaderboardLink = (eventId) => {
   const url = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
@@ -98,9 +90,7 @@ const columns = computed(() => [
   { name: 'actions', label: t('actions'), align: 'right' }
 ])
 
-onMounted(() => {
-  fetchEvents()
-})
+onMounted(() => { fetchEvents() })
 
 const fetchEvents = async () => {
   try {
@@ -133,6 +123,8 @@ const confirmDeleteEvent = (eventRow) => {
   })
 }
 </script>
+
 <style scoped>
+.admin-page { max-width: 900px; margin: 0 auto; }
 .tracking-tight { letter-spacing: -0.02em; }
 </style>

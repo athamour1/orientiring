@@ -1,34 +1,35 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
+  <q-page class="q-pa-lg admin-page">
+    <div class="row items-center q-mb-xl">
       <q-btn flat round icon="arrow_back" color="grey-8" @click="$router.back()" class="q-mr-sm" />
       <div class="text-h5 text-weight-bold tracking-tight">{{ $t('teamManagement') }}</div>
       <q-space />
       <q-btn color="primary" icon="person_add" :label="$t('registerTeam')" unelevated no-caps @click="showDialog = true" />
     </div>
 
-    <q-table :rows="teams" :columns="columns" row-key="id" flat bordered class="shadow-2">
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn flat round color="negative" dense icon="delete" @click="confirmDelete(props.row)" />
-        </q-td>
-      </template>
-    </q-table>
+    <q-card flat bordered class="shadow-2">
+      <q-table :rows="teams" :columns="columns" row-key="id" flat class="admin-table">
+        <template v-slot:body-cell-actions="props">
+          <q-td :props="props">
+            <q-btn flat round color="negative" dense icon="delete" @click="confirmDelete(props.row)" />
+          </q-td>
+        </template>
+      </q-table>
+    </q-card>
 
     <!-- Modal -->
     <q-dialog v-model="showDialog">
-      <q-card style="min-width: 350px" class="q-pa-sm rounded-borders">
+      <q-card style="min-width: 380px" class="q-pa-sm">
         <q-card-section>
-          <div class="text-h6 text-weight-bold">{{ $t('registerNewTeam') }}</div>
-          <div class="text-caption text-grey">{{ $t('provideCredentials') }}</div>
+          <div class="text-h6 text-weight-bold tracking-tight">{{ $t('registerNewTeam') }}</div>
+          <div class="text-caption text-grey-7">{{ $t('provideCredentials') }}</div>
         </q-card-section>
-
         <q-card-section class="q-pt-none">
           <q-form @submit="createTeam" class="q-gutter-md">
             <q-input v-model="form.username" :label="$t('teamUsername')" outlined :rules="[val => !!val || 'Required']" />
             <q-input v-model="form.password" :label="$t('teamPassword')" outlined type="password" :rules="[val => !!val || 'Required']" />
-            <div class="row justify-end q-mt-md">
-              <q-btn flat :label="$t('cancel')" color="grey" v-close-popup no-caps />
+            <div class="row justify-end q-mt-md q-gutter-sm">
+              <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
               <q-btn unelevated :label="$t('register')" color="primary" type="submit" no-caps />
             </div>
           </q-form>
@@ -96,3 +97,8 @@ const confirmDelete = (team) => {
   })
 }
 </script>
+
+<style scoped>
+.admin-page { max-width: 900px; margin: 0 auto; }
+.tracking-tight { letter-spacing: -0.02em; }
+</style>
