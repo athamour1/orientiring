@@ -44,7 +44,10 @@
             <q-btn flat round color="primary" dense icon="qr_code" @click="openQrPreview(props.row)">
               <q-tooltip>{{ $t('viewQrCode') }}</q-tooltip>
             </q-btn>
-            <q-btn flat round color="negative" dense icon="delete" class="q-ml-sm" @click="confirmDelete(props.row)" />
+            <q-btn flat round color="secondary" dense icon="edit" class="q-ml-xs" @click="openEditDialog(props.row)">
+              <q-tooltip>{{ $t('edit') }}</q-tooltip>
+            </q-btn>
+            <q-btn flat round color="negative" dense icon="delete" class="q-ml-xs" @click="confirmDelete(props.row)" />
           </q-td>
         </template>
       </q-table>
@@ -74,6 +77,54 @@
             <div class="row justify-end q-mt-lg q-gutter-sm">
               <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
               <q-btn unelevated :label="$t('deploy')" color="primary" type="submit" no-caps />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Edit Checkpoint Modal -->
+    <q-dialog v-model="editDialog" @hide="onEditDialogHide">
+      <q-card style="min-width: 380px; width: 95vw; max-width: 520px;" class="q-pa-sm">
+        <q-card-section>
+          <div class="text-h6 text-weight-bold tracking-tight">{{ $t('editCheckpoint') }}</div>
+          <div class="text-caption text-grey-7">{{ $t('editCheckpointDesc') }}</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-form @submit="saveEdit" class="q-gutter-md">
+            <q-input v-model="editForm.name" :label="$t('locationName')" outlined :rules="[val => !!val || 'Required']" />
+            <div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-6">
+                  <q-input v-model.number="editForm.latitude" :label="$t('latitude')" type="number" step="any" outlined />
+                </div>
+                <div class="col-6">
+                  <q-input v-model.number="editForm.longitude" :label="$t('longitude')" type="number" step="any" outlined />
+                </div>
+              </div>
+            </div>
+            <!-- Mini map -->
+            <div style="position:relative; border-radius:10px; overflow:hidden; height:200px;">
+              <div id="edit-map" style="height:200px; width:100%;"></div>
+              <div class="edit-zoom-btns">
+                <q-btn round elevated color="white" text-color="dark" icon="add" size="xs" @click="editMap && editMap.zoomIn()" />
+                <q-btn round elevated color="white" text-color="dark" icon="remove" size="xs" @click="editMap && editMap.zoomOut()" />
+              </div>
+              <div class="text-caption text-grey-6 edit-map-hint">{{ $t('clickMapToSet') }}</div>
+            </div>
+            <div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-6">
+                  <q-input v-model.number="editForm.pointValue" :label="$t('pointValueReward')" type="number" outlined :rules="[val => !!val || 'Required']" />
+                </div>
+                <div class="col-6">
+                  <q-input v-model.number="editForm.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined />
+                </div>
+              </div>
+            </div>
+            <div class="row justify-end q-gutter-sm">
+              <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
+              <q-btn unelevated :label="$t('saveChanges')" color="primary" type="submit" no-caps />
             </div>
           </q-form>
         </q-card-section>
@@ -119,13 +170,17 @@ const eventId = route.params.eventId
 const checkpoints = ref([])
 const showDialog = ref(false)
 const previewDialog = ref(false)
+const editDialog = ref(false)
 const previewCp = ref(null)
 const previewUrl = ref('')
 const form = ref({ name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
+const editForm = ref({ id: null, name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
 const baseLayers = ref([])
 const activeBaseName = ref('street')
 let currentBaseTile = null
 let map = null
+let editMap = null
+let editMarker = null
 
 function switchBase(layer) {
   if (!map || !layer) return
@@ -221,6 +276,49 @@ const fetchCheckpoints = async () => {
   } catch (err) { console.error(err) }
 }
 
+const openEditDialog = async (cp) => {
+  editForm.value = { id: cp.id, name: cp.name, latitude: cp.latitude, longitude: cp.longitude, pointValue: cp.pointValue, bonusForFirst: cp.bonusForFirst ?? 0 }
+  editDialog.value = true
+  await nextTick()
+  if (editMap) { editMap.remove(); editMap = null; editMarker = null }
+  editMap = L.map('edit-map', { zoomControl: false }).setView([cp.latitude, cp.longitude], 16)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(editMap)
+  editMarker = L.marker([cp.latitude, cp.longitude], { draggable: true }).addTo(editMap)
+  editMarker.on('dragend', () => {
+    const { lat, lng } = editMarker.getLatLng()
+    editForm.value.latitude = Number(lat.toFixed(6))
+    editForm.value.longitude = Number(lng.toFixed(6))
+  })
+  editMap.on('click', (e) => {
+    editMarker.setLatLng(e.latlng)
+    editForm.value.latitude = Number(e.latlng.lat.toFixed(6))
+    editForm.value.longitude = Number(e.latlng.lng.toFixed(6))
+  })
+  setTimeout(() => editMap.invalidateSize(), 150)
+}
+
+const onEditDialogHide = () => {
+  if (editMap) { editMap.remove(); editMap = null; editMarker = null }
+}
+
+const saveEdit = async () => {
+  try {
+    await api.put(`/admin/events/${eventId}/checkpoints/${editForm.value.id}`, {
+      name: editForm.value.name,
+      latitude: editForm.value.latitude,
+      longitude: editForm.value.longitude,
+      pointValue: editForm.value.pointValue,
+      bonusForFirst: editForm.value.bonusForFirst,
+    })
+    editDialog.value = false
+    fetchCheckpoints()
+    $q.notify({ type: 'positive', message: t('checkpointUpdated'), position: 'top-right', timeout: 1800 })
+  } catch (err) {
+    console.error(err)
+    $q.notify({ type: 'negative', message: t('failedToSaveSettings'), position: 'top-right', timeout: 2000 })
+  }
+}
+
 const getCurrentLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
@@ -303,6 +401,28 @@ const confirmDelete = (cp) => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.edit-zoom-btns {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.edit-map-hint {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(0,0,0,0.55);
+  color: #fff !important;
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 .admin-layer-btn {
   position: absolute;
