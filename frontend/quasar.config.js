@@ -80,14 +80,15 @@ export default defineConfig((/* ctx */) => {
     framework: {
       config: {
         brand: {
-          primary:   '#3949AB', // deep indigo – headers, buttons
-          secondary: '#546E7A', // blue-grey – secondary actions
-          accent:    '#FFA000', // amber gold – highlights, stars
-          positive:  '#2E7D32',
-          negative:  '#C62828',
-          info:      '#0277BD',
-          warning:   '#F57F17',
-          dark:      '#1A1A2E',
+          primary:   '#8e5add',
+          secondary: '#6c3fc4',
+          accent:    '#c4a0f5',
+          positive:  '#3dba6f',
+          negative:  '#e0345a',
+          info:      '#a67ce8',
+          warning:   '#f0a832',
+          dark:      '#1e1030',
+          'dark-page': '#150b24',
         }
       },
 
