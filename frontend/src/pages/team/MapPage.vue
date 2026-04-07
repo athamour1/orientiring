@@ -18,8 +18,8 @@
     <q-btn
       round unelevated
       icon="my_location"
-      color="white"
-      text-color="primary"
+      :color="followMode ? 'primary' : 'white'"
+      :text-color="followMode ? 'white' : 'primary'"
       size="md"
       class="locate-btn shadow-4"
       :disable="!lastSentLat"
@@ -72,6 +72,7 @@ const bannerDismissed = ref(false)
 const gpsBlocked = ref(false)
 const gpsPermissionDenied = ref(false)
 const gpsRetrying = ref(false)
+const followMode = ref(false)
 let watchId = null
 let eventInterval = null
 let initialMapFit = false
@@ -82,6 +83,7 @@ let locationSocket = null
 
 function locateMe() {
   if (lastSentLat !== null && map.value) {
+    followMode.value = true
     map.value.setView([lastSentLat, lastSentLng], 19, { animate: true })
   }
 }
@@ -140,6 +142,10 @@ onMounted(async () => {
     layers: [initialLayer]
   })
 
+  // Disarm follow mode when the user manually drags or zooms
+  map.value.on('dragstart', () => { followMode.value = false })
+  map.value.on('zoomstart', (e) => { if (e.originalEvent) followMode.value = false })
+
   L.control.layers({
     "🌙 Dark": dark,
     "🗺️ Street": street,
@@ -183,6 +189,11 @@ onMounted(async () => {
 
 async function onPosition(pos) {
   const { latitude, longitude } = pos.coords
+
+  // Follow mode — keep map centred on the team
+  if (followMode.value && map.value) {
+    map.value.panTo([latitude, longitude], { animate: true, duration: 0.5 })
+  }
 
   // Only show team's own dot on their map if admin hasn't hidden locations
   if (activeEvent.value?.showTeamLocation !== false) {
