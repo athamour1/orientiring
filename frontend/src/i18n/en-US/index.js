@@ -144,6 +144,11 @@ export default {
   bonusForFirstHint: 'Extra points awarded to the first team to scan this checkpoint (0 = disabled)',
   firstScanBonus: '🥇 FIRST! Bonus +{bonus} pts awarded!',
   alreadyScanned: 'Already scanned! Your team captured this checkpoint earlier.',
+  gpsRequired: 'Location Access Required',
+  gpsPermissionDenied: 'You denied location access. This app needs GPS to show your position and track your progress.',
+  gpsUnavailable: 'GPS is currently unavailable. Make sure location services are enabled on your device.',
+  gpsEnableHint: 'Tap the lock icon in your browser\'s address bar and allow Location access, then retry.',
+  retryGps: 'Retry Location Access',
   showRouteTooltip: 'Click to filter & show this team\'s GPS route on the map',
   routeHint: 'Click a team button to filter the feed and show their GPS route history on the map',
   viewingRouteFor: 'Showing GPS route for: {team}'

@@ -13,6 +13,25 @@
         </div>
       </div>
     </transition>
+
+    <!-- GPS blocked overlay -->
+    <transition name="fade">
+      <div v-if="gpsBlocked" class="gps-overlay">
+        <div class="gps-card">
+          <div class="gps-icon">📍</div>
+          <div class="gps-title">{{ $t('gpsRequired') }}</div>
+          <div class="gps-body">{{ gpsPermissionDenied ? $t('gpsPermissionDenied') : $t('gpsUnavailable') }}</div>
+          <div v-if="gpsPermissionDenied" class="gps-hint">{{ $t('gpsEnableHint') }}</div>
+          <q-btn
+            unelevated rounded color="primary" size="lg" no-caps
+            :label="$t('retryGps')"
+            :loading="gpsRetrying"
+            class="q-mt-lg full-width"
+            @click="retryGps"
+          />
+        </div>
+      </div>
+    </transition>
   </q-page>
 </template>
 
@@ -38,6 +57,9 @@ const activeEvent = ref(null)
 const userMarker = ref(null)
 const allDone = ref(false)
 const bannerDismissed = ref(false)
+const gpsBlocked = ref(false)
+const gpsPermissionDenied = ref(false)
+const gpsRetrying = ref(false)
 let watchId = null
 let eventInterval = null
 let initialMapFit = false
@@ -45,6 +67,34 @@ let lastSentLat = null
 let lastSentLng = null
 let lastSentTime = 0
 let locationSocket = null
+
+function onGpsError(err) {
+  console.error(err)
+  gpsBlocked.value = true
+  // code 1 = PERMISSION_DENIED, code 2 = POSITION_UNAVAILABLE, code 3 = TIMEOUT
+  gpsPermissionDenied.value = err.code === 1
+}
+
+async function retryGps() {
+  gpsRetrying.value = true
+  // Clear the existing (failed) watch first
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null }
+
+  try {
+    // getCurrentPosition re-triggers the browser prompt on some platforms
+    await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 })
+    })
+    // Success — permission granted, restart the watch
+    gpsBlocked.value = false
+    gpsPermissionDenied.value = false
+    watchId = navigator.geolocation.watchPosition(onPosition, onGpsError, { enableHighAccuracy: true })
+  } catch (err) {
+    onGpsError(err)
+  } finally {
+    gpsRetrying.value = false
+  }
+}
 
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000
@@ -106,7 +156,10 @@ onMounted(async () => {
 
   // Always track GPS — admin needs location data even when showTeamLocation is off
   if (navigator.geolocation) {
-    watchId = navigator.geolocation.watchPosition(onPosition, (err) => { console.error(err) }, { enableHighAccuracy: true })
+    watchId = navigator.geolocation.watchPosition(onPosition, onGpsError, { enableHighAccuracy: true })
+  } else {
+    gpsBlocked.value = true
+    gpsPermissionDenied.value = false
   }
 })
 
@@ -235,6 +288,34 @@ const fetchEvent = async () => {
 </script>
 
 <style scoped>
+/* GPS blocked overlay */
+.gps-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.gps-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.gps-icon { font-size: 3rem; margin-bottom: 12px; }
+.gps-title { font-size: 1.2rem; font-weight: 800; color: #111; margin-bottom: 10px; }
+.gps-body  { font-size: 0.92rem; color: #555; line-height: 1.5; }
+.gps-hint  { font-size: 0.82rem; color: #888; margin-top: 10px; line-height: 1.5; }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
 /* Completion banner */
 .completion-banner {
   position: absolute;
