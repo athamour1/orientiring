@@ -20,4 +20,10 @@ export class CreateCheckpointDto {
   @Min(1)
   @Max(10000)
   pointValue?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(10000)
+  bonusForFirst?: number;
 }

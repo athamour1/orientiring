@@ -45,6 +45,7 @@ model Checkpoint {
   latitude       Float
   longitude      Float
   pointValue     Int      @default(10)
+  bonusForFirst  Int      @default(0)
   qrSecretString String   @unique
   
   event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)

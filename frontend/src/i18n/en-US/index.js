@@ -139,5 +139,8 @@ export default {
   endTime: 'End Time',
   showTeamLocation: 'Allow teams to share their GPS location',
   filterByTeam: 'Filter by team',
-  showAllTeams: 'Show all teams'
+  showAllTeams: 'Show all teams',
+  bonusForFirst: 'First-scan bonus points',
+  bonusForFirstHint: 'Extra points awarded to the first team to scan this checkpoint (0 = disabled)',
+  firstScanBonus: '🥇 FIRST! Bonus +{bonus} pts awarded!'
 }

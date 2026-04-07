@@ -45,6 +45,8 @@
             </div>
             
             <q-input v-model.number="form.pointValue" :label="$t('pointValueReward')" type="number" outlined :rules="[val => !!val || 'Required']" />
+
+            <q-input v-model.number="form.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined :hint="$t('bonusForFirstHint')" />
             
             <div class="row items-center q-mt-sm">
                <q-btn flat color="secondary" icon="my_location" :label="$t('useGps')" @click="getCurrentLocation" class="full-width" no-caps />
@@ -102,7 +104,7 @@ const showDialog = ref(false)
 const previewDialog = ref(false)
 const previewCp = ref(null)
 const previewUrl = ref('')
-const form = ref({ name: '', latitude: null, longitude: null, pointValue: 10 })
+const form = ref({ name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
 let map = null
 
 const columns = computed(() => [
@@ -168,7 +170,7 @@ const createCheckpoint = async () => {
     await api.post(`/admin/events/${eventId}/checkpoints`, form.value)
     $q.notify({ color: 'positive', message: 'Checkpoint deployed!' })
     showDialog.value = false
-    form.value = { name: '', latitude: null, longitude: null, pointValue: 10 }
+    form.value = { name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 }
     fetchCheckpoints()
   } catch {
     $q.notify({ color: 'negative', message: 'Failed to deploy checkpoint' })

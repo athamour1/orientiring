@@ -58,8 +58,12 @@ const processScan = async (qrSecretString) => {
     isSuccess.value = true
     const cpName = res.data.checkpoint?.name || t('checkpointText')
     const cpPoints = res.data.checkpoint?.pointValue || 10
-    resultMessage.value = t('targetAcquired', { cpName, points: cpPoints })
-    $q.notify({ color: 'positive', icon: 'emoji_events', message: t('checkpointSuccessfullyValidated') })
+    const bonus = res.data.bonusAwarded || 0
+    resultMessage.value = t('targetAcquired', { cpName, points: cpPoints + bonus })
+    const msg = bonus > 0
+      ? t('firstScanBonus', { bonus })
+      : t('checkpointSuccessfullyValidated')
+    $q.notify({ color: bonus > 0 ? 'warning' : 'positive', icon: bonus > 0 ? 'stars' : 'emoji_events', message: msg })
   } catch(err) {
     isSuccess.value = false
     const msg = err.response?.data?.message || t('validationFailed')

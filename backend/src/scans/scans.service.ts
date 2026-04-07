@@ -6,7 +6,7 @@ export class ScansService {
   constructor(private prisma: PrismaService) {}
 
   async processScan(teamId: number, qrSecretString: string) {
-    // 1. Find checkpoint matching the qrSecretString
+    // 1. Find checkpoint
     const checkpoint = await this.prisma.checkpoint.findUnique({
       where: { qrSecretString },
       include: { event: true },
@@ -16,7 +16,7 @@ export class ScansService {
       throw new BadRequestException('Invalid QR code');
     }
 
-    // 2. Check if the event is active and within its time window
+    // 2. Check event is active and within time window
     if (!checkpoint.event.isActive) {
       throw new BadRequestException('Event is not currently active');
     }
@@ -28,29 +28,25 @@ export class ScansService {
       throw new BadRequestException('Event has already ended');
     }
 
-    // 3. Check if team has already scanned it
+    // 3. Check for duplicate scan
     const existingScan = await this.prisma.scan.findUnique({
-      where: {
-        teamId_checkpointId: {
-          teamId,
-          checkpointId: checkpoint.id,
-        },
-      },
+      where: { teamId_checkpointId: { teamId, checkpointId: checkpoint.id } },
     });
-
     if (existingScan) {
       throw new ConflictException('Checkpoint already scanned by your team');
     }
 
-    // 4. Record the scan
-    return this.prisma.scan.create({
-      data: {
-        teamId,
-        checkpointId: checkpoint.id,
-      },
-      include: {
-        checkpoint: true
-      }
+    // 4. Check if this team is first to scan (for bonus)
+    const isFirst = checkpoint.bonusForFirst > 0
+      ? (await this.prisma.scan.count({ where: { checkpointId: checkpoint.id } })) === 0
+      : false;
+
+    // 5. Record the scan
+    const scan = await this.prisma.scan.create({
+      data: { teamId, checkpointId: checkpoint.id },
+      include: { checkpoint: true },
     });
+
+    return { ...scan, isFirst, bonusAwarded: isFirst ? checkpoint.bonusForFirst : 0 };
   }
 }
