@@ -1,25 +1,31 @@
 <template>
-  <q-page class="flex flex-center">
-    <div class="full-width q-pa-md text-center max-w-sm main-card rounded-borders shadow-2">
-      <h5 class="q-mt-md q-mb-lg text-weight-bold tracking-tight branded-title">{{ $t('scanCheckpoint') }}</h5>
-
-      <div v-if="scanning" class="scanner-wrapper rounded-borders overflow-hidden shadow-4 relative-position bg-dark q-mb-md">
-         <qrcode-stream @detect="onDetect" @error="onError"></qrcode-stream>
-      </div>
-      
-      <div v-else class="q-my-lg text-negative">
-        <q-icon name="videocam_off" size="3rem" class="q-mb-sm" />
-        <div class="text-subtitle1">{{ $t('scanner') }} Error</div>
+  <q-page class="scan-page">
+    <!-- Full-screen camera -->
+    <div class="camera-area">
+      <qrcode-stream v-if="scanning" @detect="onDetect" @error="onError" class="camera-stream" />
+      <div v-else class="camera-error flex flex-center column text-white">
+        <q-icon name="videocam_off" size="4rem" class="q-mb-md" />
+        <div class="text-h6">{{ $t('cameraAccessError') }}</div>
       </div>
 
-      <div v-if="resultMessage" class="q-mt-md text-subtitle1 q-pa-md rounded-borders" :class="isSuccess ? 'bg-green-1 text-positive' : 'bg-red-1 text-negative'">
-        <q-icon :name="isSuccess ? 'check_circle' : 'warning'" size="sm" class="q-mr-sm" />
-        {{ resultMessage }}
-      </div>
-      
-      <div v-else class="q-mt-md text-caption text-grey-8">
-        {{ $t('cameraAlwaysOnMessage') }}
-      </div>
+      <!-- Overlay: corner frame -->
+      <div class="scan-frame" />
+    </div>
+
+    <!-- Bottom status bar -->
+    <div class="status-bar q-px-lg q-py-md">
+      <transition name="fade" mode="out-in">
+        <div v-if="resultMessage" :key="resultMessage"
+          class="result-pill row items-center q-gutter-sm"
+          :class="isSuccess ? 'result-success' : 'result-error'"
+        >
+          <q-icon :name="isSuccess ? 'check_circle' : 'warning'" size="sm" />
+          <span>{{ resultMessage }}</span>
+        </div>
+        <div v-else class="hint-text text-center text-grey-5">
+          {{ $t('cameraAlwaysOnMessage') }}
+        </div>
+      </transition>
     </div>
   </q-page>
 </template>
@@ -50,10 +56,8 @@ const processScan = async (qrSecretString) => {
   try {
     const res = await api.post('/team/scans', { qrSecretString })
     isSuccess.value = true
-    
     const cpName = res.data.checkpoint?.name || t('checkpointText')
     const cpPoints = res.data.checkpoint?.pointValue || 10
-    
     resultMessage.value = t('targetAcquired', { cpName, points: cpPoints })
     $q.notify({ color: 'positive', icon: 'emoji_events', message: t('checkpointSuccessfullyValidated') })
   } catch(err) {
@@ -67,17 +71,10 @@ const processScan = async (qrSecretString) => {
 const onDetect = async (detectedCodes) => {
   if (isProcessing || detectedCodes.length === 0) return
   isProcessing = true
-  
   let rawValue = detectedCodes[0].rawValue
-  if (rawValue.includes('qr=')) {
-    rawValue = rawValue.split('qr=')[1].split('&')[0]
-  }
+  if (rawValue.includes('qr=')) rawValue = rawValue.split('qr=')[1].split('&')[0]
   await processScan(rawValue)
-  
-  // Prevent duplicate immediate scans by adding a cooldown
-  setTimeout(() => {
-    isProcessing = false
-  }, 4000)
+  setTimeout(() => { isProcessing = false }, 4000)
 }
 
 const onError = () => {
@@ -88,35 +85,96 @@ const onError = () => {
 </script>
 
 <style scoped>
-.main-card {
-  transition: background-color 0.3s, border-color 0.3s;
-}
-body.body--light .main-card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-}
-body.body--dark .main-card {
-  background: #1e1e1e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.scan-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
 }
 
-body.body--light .branded-title {
-  color: #1A1A2E; 
-}
-body.body--dark .branded-title {
-  color: #ffffff;
-}
-
-.scanner-wrapper {
+.camera-area {
   position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.camera-stream {
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
+  object-fit: cover;
 }
-.max-w-sm {
-  max-width: 400px;
-  margin: 0 auto;
+
+.camera-error {
+  width: 100%;
+  height: 100%;
+  background: #111;
 }
-.tracking-tight {
-  letter-spacing: -0.02em;
+
+/* Corner-bracket scan frame */
+.scan-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  width: min(70vw, 260px);
+  height: min(70vw, 260px);
+  border-radius: 12px;
+  pointer-events: none;
 }
+.scan-frame::before,
+.scan-frame::after,
+.scan-frame > *,
+.scan-frame {
+  box-sizing: border-box;
+}
+.scan-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+}
+/* Four corner brackets via box-shadow trick */
+.scan-frame::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  background:
+    linear-gradient(white, white) top    left  / 24px 3px no-repeat,
+    linear-gradient(white, white) top    left  / 3px 24px no-repeat,
+    linear-gradient(white, white) top    right / 24px 3px no-repeat,
+    linear-gradient(white, white) top    right / 3px 24px no-repeat,
+    linear-gradient(white, white) bottom left  / 24px 3px no-repeat,
+    linear-gradient(white, white) bottom left  / 3px 24px no-repeat,
+    linear-gradient(white, white) bottom right / 24px 3px no-repeat,
+    linear-gradient(white, white) bottom right / 3px 24px no-repeat;
+}
+
+/* Bottom status area */
+.status-bar {
+  background: rgba(0, 0, 0, 0.82);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-pill {
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.result-success { background: rgba(67,160,71,0.25); color: #a5d6a7; }
+.result-error   { background: rgba(229,57,53,0.25);  color: #ef9a9a; }
+
+.hint-text {
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
