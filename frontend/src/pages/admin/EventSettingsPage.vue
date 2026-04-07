@@ -117,12 +117,13 @@ const appLang = ref(localStorage.getItem('appLang') || 'en-US')
 const applyLang = (lang) => {
   locale.value = lang
   localStorage.setItem('appLang', lang)
+  form.value.language = lang
 }
 const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
 
-const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null })
+const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null, language: 'en-US' })
 const copied = ref(false)
 const publicUrl = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
 
@@ -143,6 +144,7 @@ const copyLink = () => {
 onMounted(async () => {
   try {
     const res = await api.get(`/admin/events/${eventId}`)
+    const lang = res.data.language || 'en-US'
     form.value = {
       name: res.data.name,
       description: res.data.description,
@@ -150,7 +152,11 @@ onMounted(async () => {
       showTeamLocation: res.data.showTeamLocation ?? true,
       startTime: toLocalInput(res.data.startTime),
       endTime: toLocalInput(res.data.endTime),
+      language: lang,
     }
+    // Sync the local toggle and apply locale immediately
+    appLang.value = lang
+    applyLang(lang)
   } catch (err) { console.error(err) }
 })
 

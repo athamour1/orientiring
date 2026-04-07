@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional, MaxLength, IsDateString } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, MaxLength, IsDateString, IsIn } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
@@ -25,4 +25,9 @@ export class CreateEventDto {
   @IsOptional()
   @IsBoolean()
   showTeamLocation?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['en-US', 'el'])
+  language?: string;
 }

@@ -32,7 +32,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const map = ref(null)
 const $q = useQuasar()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const markers = ref([])
 const activeEvent = ref(null)
 const userMarker = ref(null)
@@ -147,6 +147,12 @@ const fetchEvent = async () => {
   try {
     const res = await api.get('/team/events/active')
     activeEvent.value = res.data
+
+    // Apply language set by the admin for this event
+    if (res.data?.language) {
+      locale.value = res.data.language
+      localStorage.setItem('appLang', res.data.language)
+    }
 
     // Respect showTeamLocation toggle — start/stop GPS watch if setting changed
     if (navigator.geolocation) {
