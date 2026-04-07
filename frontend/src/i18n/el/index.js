@@ -36,7 +36,7 @@ export default {
   updatedRealtime: 'Οι κατατάξεις ενημερώνονται σε πραγματικό χρόνο',
   allCheckpointsDone: 'Όλα τα Σημεία Ελέγχου Ολοκληρώθηκαν!',
   headBackToStart: 'Επιστρέψτε στο σημείο εκκίνησης!',
-  followReturnPoint: 'Ακολουθήστε το 🏁 σημείο στον χάρτη για να επιστρέψετε!',
+  followReturnPoint: 'Ακολουθήστε το σημείο επιστροφής στον χάρτη',
   tapToDismiss: 'Πατήστε για απόκρυψη',
   yourTeam: 'Η Ομάδα σας',
   rewardPts: 'Ανταμοιβή: {points} ΠΝΤ',

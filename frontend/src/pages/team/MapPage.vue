@@ -13,7 +13,7 @@
               <div class="banner-sub">{{ $t('followReturnPoint') }}</div>
             </div>
           </div>
-          <q-btn flat round dense icon="close" color="white" @click.stop="bannerDismissed = true" />
+          <q-btn flat round dense icon="close" color="white" size="sm" @click.stop="bannerDismissed = true" />
         </div>
       </div>
     </transition>
@@ -445,11 +445,11 @@ const fetchEvent = async () => {
 .banner-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
-.trophy { font-size: 1.8rem; line-height: 1; }
-.banner-title { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; }
-.banner-sub { font-size: 0.78rem; opacity: 0.85; margin-top: 1px; }
+.trophy { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+.banner-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.banner-sub { font-size: 0.8rem; opacity: 0.9; margin-top: 3px; font-weight: 500; line-height: 1.3; }
 
 
 .slide-up-enter-active { transition: transform 0.35s ease, opacity 0.35s ease; }

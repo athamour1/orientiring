@@ -36,7 +36,7 @@ export default {
   updatedRealtime: 'Rankings updated in real-time',
   allCheckpointsDone: 'All Checkpoints Done!',
   headBackToStart: 'Head back to the starting point!',
-  followReturnPoint: 'Follow the 🏁 marker on the map to the return point!',
+  followReturnPoint: 'Follow the marker on the map to the return point',
   tapToDismiss: 'Tap to dismiss',
   yourTeam: 'Your Team',
   rewardPts: 'Reward: {points} PTS',
