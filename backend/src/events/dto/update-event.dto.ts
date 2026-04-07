@@ -22,4 +22,8 @@ export class UpdateEventDto {
   @IsOptional()
   @IsDateString()
   endTime?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  showTeamLocation?: boolean;
 }

@@ -21,4 +21,8 @@ export class CreateEventDto {
   @IsOptional()
   @IsDateString()
   endTime?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  showTeamLocation?: boolean;
 }

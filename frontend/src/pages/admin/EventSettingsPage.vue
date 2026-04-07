@@ -21,6 +21,15 @@
           class="q-mt-sm"
         />
 
+        <q-toggle
+          v-model="form.showTeamLocation"
+          checked-icon="location_on"
+          unchecked-icon="location_off"
+          :label="$t('showTeamLocation')"
+          color="primary"
+          size="lg"
+        />
+
         <q-separator class="q-my-sm" />
 
         <!-- Timer section -->
@@ -88,7 +97,7 @@ const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
 
-const form = ref({ name: '', description: '', isActive: false, startTime: null, endTime: null })
+const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null })
 const copied = ref(false)
 const publicUrl = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
 
@@ -113,6 +122,7 @@ onMounted(async () => {
       name: res.data.name,
       description: res.data.description,
       isActive: res.data.isActive,
+      showTeamLocation: res.data.showTeamLocation ?? true,
       startTime: toLocalInput(res.data.startTime),
       endTime: toLocalInput(res.data.endTime),
     }

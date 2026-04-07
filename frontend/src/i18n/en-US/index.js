@@ -136,5 +136,6 @@ export default {
   eventTimer: 'Event Timer',
   eventTimerDesc: 'Scans will only be accepted within this time window. Leave blank for no restriction.',
   startTime: 'Start Time',
-  endTime: 'End Time'
+  endTime: 'End Time',
+  showTeamLocation: 'Allow teams to share their GPS location'
 }

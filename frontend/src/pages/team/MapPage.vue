@@ -94,42 +94,38 @@ onMounted(async () => {
   await fetchEvent()
   eventInterval = setInterval(fetchEvent, 5000)
 
-  if (navigator.geolocation) {
-    watchId = navigator.geolocation.watchPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords
-      
-      if (!userMarker.value) {
-        // Draw the user physically on the map
-        userMarker.value = L.circleMarker([latitude, longitude], {
-          color: '#1565c0', fillColor: '#1e88e5', fillOpacity: 0.9, radius: 10, weight: 3
-        }).bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
-        
-        // Only force camera focus if absolutely no checkpoints exist
-        if (markers.value.length === 0) {
-          map.value.setView([latitude, longitude], 16)
-        }
-      } else {
-        // Update user marker dynamically as they walk playing the game
-        userMarker.value.setLatLng([latitude, longitude])
-      }
-
-      // Push position to backend only when moved >10m or >4s since last send
-      const now = Date.now()
-      const movedEnough = lastSentLat === null ||
-        haversineMetres(lastSentLat, lastSentLng, latitude, longitude) > 10
-      const enoughTime = now - lastSentTime > 4000
-      if (movedEnough || enoughTime) {
-        try {
-          await api.put('/team/events/location', { latitude, longitude })
-          lastSentLat = latitude
-          lastSentLng = longitude
-          lastSentTime = now
-        } catch { /* silent — non-critical */ }
-      }
-      
-    }, () => { /* GPS unavailable — user will see no location marker */ }, { enableHighAccuracy: true })
+  if (navigator.geolocation && activeEvent.value?.showTeamLocation !== false) {
+    watchId = navigator.geolocation.watchPosition(onPosition, () => {}, { enableHighAccuracy: true })
   }
 })
+
+async function onPosition(pos) {
+  const { latitude, longitude } = pos.coords
+
+  if (!userMarker.value) {
+    userMarker.value = L.circleMarker([latitude, longitude], {
+      color: '#1565c0', fillColor: '#1e88e5', fillOpacity: 0.9, radius: 10, weight: 3
+    }).bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
+    if (markers.value.length === 0) {
+      map.value.setView([latitude, longitude], 16)
+    }
+  } else {
+    userMarker.value.setLatLng([latitude, longitude])
+  }
+
+  const now = Date.now()
+  const movedEnough = lastSentLat === null ||
+    haversineMetres(lastSentLat, lastSentLng, latitude, longitude) > 10
+  const enoughTime = now - lastSentTime > 4000
+  if (movedEnough || enoughTime) {
+    try {
+      await api.put('/team/events/location', { latitude, longitude })
+      lastSentLat = latitude
+      lastSentLng = longitude
+      lastSentTime = now
+    } catch { /* silent — non-critical */ }
+  }
+}
 
 onUnmounted(() => {
   if (watchId !== null && navigator.geolocation) {
@@ -142,6 +138,19 @@ const fetchEvent = async () => {
   try {
     const res = await api.get('/team/events/active')
     activeEvent.value = res.data
+
+    // Respect showTeamLocation toggle — start/stop GPS watch if setting changed
+    if (navigator.geolocation) {
+      const shouldTrack = activeEvent.value?.showTeamLocation !== false
+      const isTracking = watchId !== null
+      if (shouldTrack && !isTracking) {
+        watchId = navigator.geolocation.watchPosition(onPosition, () => {}, { enableHighAccuracy: true })
+      } else if (!shouldTrack && isTracking) {
+        navigator.geolocation.clearWatch(watchId)
+        watchId = null
+        if (userMarker.value) { map.value?.removeLayer(userMarker.value); userMarker.value = null }
+      }
+    }
 
     if (!activeEvent.value || activeEvent.value === '') {
       return $q.notify({ color: 'warning', icon: 'warning', message: t('noActiveEvent') })

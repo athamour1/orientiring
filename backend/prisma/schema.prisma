@@ -31,8 +31,9 @@ model Event {
   description String?
   startTime   DateTime?
   endTime     DateTime?
-  isActive    Boolean      @default(false)
-  
+  isActive          Boolean      @default(false)
+  showTeamLocation  Boolean      @default(true)
+
   checkpoints Checkpoint[]
   teams       User[]
 }
