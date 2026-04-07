@@ -137,5 +137,7 @@ export default {
   eventTimerDesc: 'Scans will only be accepted within this time window. Leave blank for no restriction.',
   startTime: 'Start Time',
   endTime: 'End Time',
-  showTeamLocation: 'Allow teams to share their GPS location'
+  showTeamLocation: 'Allow teams to share their GPS location',
+  filterByTeam: 'Filter by team',
+  showAllTeams: 'Show all teams'
 }
