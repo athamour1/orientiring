@@ -7,21 +7,48 @@
 
     <q-card flat bordered class="q-pa-md shadow-2 q-mb-lg">
       <q-form @submit="updateEvent" class="q-gutter-md">
-        <q-input v-model="form.name" :label="$t('eventName')" outlined :rules="[val => !!val || 'Required']" />
-        
+        <q-input v-model="form.name" :label="$t('eventName')" outlined :rules="[val => !!val || t('eventNameRequired')]" />
+
         <q-input v-model="form.description" :label="$t('eventDesc')" outlined type="textarea" autogrow />
-        
-        <q-toggle 
-          v-model="form.isActive" 
-          checked-icon="check" 
+
+        <q-toggle
+          v-model="form.isActive"
+          checked-icon="check"
           unchecked-icon="clear"
-          :label="$t('eventIsLive')" 
-          color="positive" 
-          size="lg" 
-          class="q-mt-lg" 
+          :label="$t('eventIsLive')"
+          color="positive"
+          size="lg"
+          class="q-mt-sm"
         />
-        
-        <div class="row q-mt-xl">
+
+        <q-separator class="q-my-sm" />
+
+        <!-- Timer section -->
+        <div class="text-subtitle2 text-weight-bold q-mb-xs">⏱ {{ $t('eventTimer') }}</div>
+        <div class="text-caption text-grey-7 q-mb-sm">{{ $t('eventTimerDesc') }}</div>
+
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6">
+            <q-input
+              v-model="form.startTime"
+              :label="$t('startTime')"
+              outlined
+              type="datetime-local"
+              clearable
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <q-input
+              v-model="form.endTime"
+              :label="$t('endTime')"
+              outlined
+              type="datetime-local"
+              clearable
+            />
+          </div>
+        </div>
+
+        <div class="row q-mt-md">
           <q-btn unelevated color="primary" :label="$t('saveChanges')" type="submit" class="full-width" size="lg" no-caps />
         </div>
       </q-form>
@@ -61,9 +88,17 @@ const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
 
-const form = ref({ name: '', description: '', isActive: false })
+const form = ref({ name: '', description: '', isActive: false, startTime: null, endTime: null })
 const copied = ref(false)
 const publicUrl = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
+
+// Convert ISO string → datetime-local string (YYYY-MM-DDTHH:mm)
+function toLocalInput(iso) {
+  if (!iso) return null
+  const d = new Date(iso)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 const copyLink = () => {
   navigator.clipboard.writeText(publicUrl)
@@ -74,10 +109,12 @@ const copyLink = () => {
 onMounted(async () => {
   try {
     const res = await api.get(`/admin/events/${eventId}`)
-    form.value = { 
-      name: res.data.name, 
-      description: res.data.description, 
-      isActive: res.data.isActive 
+    form.value = {
+      name: res.data.name,
+      description: res.data.description,
+      isActive: res.data.isActive,
+      startTime: toLocalInput(res.data.startTime),
+      endTime: toLocalInput(res.data.endTime),
     }
   } catch {
     $q.notify({ color: 'negative', message: t('failedToLoadSettings') })
@@ -86,7 +123,11 @@ onMounted(async () => {
 
 const updateEvent = async () => {
   try {
-    await api.put(`/admin/events/${eventId}`, form.value)
+    await api.put(`/admin/events/${eventId}`, {
+      ...form.value,
+      startTime: form.value.startTime ? new Date(form.value.startTime).toISOString() : null,
+      endTime: form.value.endTime ? new Date(form.value.endTime).toISOString() : null,
+    })
     $q.notify({ color: 'positive', icon: 'check_circle', message: t('settingsSaved') })
   } catch {
     $q.notify({ color: 'negative', message: t('failedToSaveSettings') })

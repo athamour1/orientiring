@@ -132,5 +132,9 @@ export default {
   failedToLoadSettings: 'Failed to load settings.',
   settingsSaved: 'Event settings saved successfully.',
   failedToSaveSettings: 'Failed to save settings.',
-  notScannedYet: 'Not scanned yet'
+  notScannedYet: 'Not scanned yet',
+  eventTimer: 'Event Timer',
+  eventTimerDesc: 'Scans will only be accepted within this time window. Leave blank for no restriction.',
+  startTime: 'Start Time',
+  endTime: 'End Time'
 }
