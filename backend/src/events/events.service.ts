@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { EventsGateway } from './events.gateway';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => EventsGateway)) private gateway: EventsGateway,
+  ) {}
 
   create(data: CreateEventDto) {
     return this.prisma.event.create({ data });
@@ -88,6 +92,11 @@ export class EventsService {
   }
 
   async upsertTeamLocation(userId: number, dto: UpdateLocationDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, eventId: true },
+    });
+
     const [location] = await this.prisma.$transaction([
       this.prisma.teamLocation.upsert({
         where: { teamId: userId },
@@ -98,6 +107,16 @@ export class EventsService {
         data: { teamId: userId, latitude: dto.latitude, longitude: dto.longitude },
       }),
     ]);
+
+    if (user?.eventId) {
+      this.gateway.emitLocationUpdated(user.eventId, {
+        teamId: userId,
+        teamUsername: user.username,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+      });
+    }
+
     return location;
   }
 

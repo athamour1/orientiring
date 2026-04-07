@@ -1,9 +1,13 @@
 import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class ScansService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gateway: EventsGateway,
+  ) {}
 
   async processScan(teamId: number, qrSecretString: string) {
     // 1. Find checkpoint
@@ -47,6 +51,20 @@ export class ScansService {
       include: { checkpoint: true },
     });
 
-    return { ...scan, isFirst, bonusAwarded: isFirst ? checkpoint.bonusForFirst : 0 };
+    const result = { ...scan, isFirst, bonusAwarded: isFirst ? checkpoint.bonusForFirst : 0 };
+
+    // Emit real-time event to all clients watching this event
+    const team = await this.prisma.user.findUnique({ where: { id: teamId }, select: { username: true } });
+    this.gateway.emitScanCreated(checkpoint.eventId, {
+      teamId,
+      teamUsername: team?.username ?? String(teamId),
+      checkpointId: checkpoint.id,
+      checkpointName: checkpoint.name,
+      points: checkpoint.pointValue + result.bonusAwarded,
+      bonusAwarded: result.bonusAwarded,
+      scannedAt: scan.scannedAt,
+    });
+
+    return result;
   }
 }
