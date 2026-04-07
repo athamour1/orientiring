@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
-const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL', 'ADMIN_USERNAME', 'ADMIN_PASSWORD', 'FRONTEND_URL', 'CORS_ORIGIN'];
+const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL', 'ADMIN_USERNAME', 'ADMIN_PASSWORD', 'CORS_ORIGIN'];
 
 function validateEnv() {
   const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
