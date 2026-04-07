@@ -3,8 +3,9 @@
     <q-header elevated class="bg-dark text-white">
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-        <q-toolbar-title class="text-weight-bold tracking-tight">
-          🧭 {{ $t('adminDashboard') }}
+        <q-toolbar-title class="text-weight-bold tracking-tight row items-center q-gutter-xs">
+          <img src="/favicon.svg" alt="Oriento" style="width:28px;height:28px;vertical-align:middle;" />
+          <span>{{ $t('adminDashboard') }}</span>
         </q-toolbar-title>
         <q-btn v-if="isInstallable" flat dense round icon="download" @click="promptInstall">
           <q-tooltip>{{ $t('installApp') }}</q-tooltip>
