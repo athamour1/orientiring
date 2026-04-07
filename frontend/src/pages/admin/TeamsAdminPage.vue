@@ -32,8 +32,14 @@
               :error="!!usernameError"
               :error-message="usernameError"
               :rules="[val => !!val || 'Required']"
-              @update:model-value="usernameError = ''"
-            />
+              @update:model-value="checkUsername($event)"
+            >
+              <template v-slot:append>
+                <q-spinner v-if="usernameChecking" color="grey-5" size="18px" />
+                <q-icon v-else-if="usernameAvailable === true" name="check_circle" color="positive" />
+                <q-icon v-else-if="usernameAvailable === false" name="cancel" color="negative" />
+              </template>
+            </q-input>
             <q-input v-model="form.password" :label="$t('teamPassword')" outlined type="password" :rules="[val => !!val || 'Required']" />
             <div class="row justify-end q-mt-md q-gutter-sm">
               <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
@@ -62,6 +68,26 @@ const teams = ref([])
 const showDialog = ref(false)
 const form = ref({ username: '', password: '' })
 const usernameError = ref('')
+const usernameChecking = ref(false)
+const usernameAvailable = ref(null) // null = unchecked, true = free, false = taken
+
+let debounceTimer = null
+const checkUsername = (val) => {
+  usernameAvailable.value = null
+  usernameError.value = ''
+  if (!val || val.length < 2) return
+  usernameChecking.value = true
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(async () => {
+    try {
+      const res = await api.get(`/admin/events/${eventId}/teams/check-username`, { params: { username: val } })
+      usernameAvailable.value = !res.data.taken
+      if (res.data.taken) usernameError.value = t('usernameTaken')
+    } catch { /* ignore */ } finally {
+      usernameChecking.value = false
+    }
+  }, 400)
+}
 
 const columns = computed(() => [
   { name: 'id', required: true, label: t('id'), align: 'left', field: 'id', sortable: true },
@@ -83,6 +109,9 @@ onMounted(() => {
 const onDialogHide = () => {
   form.value = { username: '', password: '' }
   usernameError.value = ''
+  usernameAvailable.value = null
+  usernameChecking.value = false
+  clearTimeout(debounceTimer)
 }
 
 const createTeam = async () => {

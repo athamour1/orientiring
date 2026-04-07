@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, ConflictException, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, ConflictException, Param, Delete, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -14,6 +14,12 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly prisma: PrismaService
   ) {}
+
+  @Get('check-username')
+  async checkUsername(@Query('username') username: string) {
+    const existing = await this.usersService.findByUsername(username);
+    return { taken: !!existing };
+  }
 
   @Get()
   async getTeams(@Param('eventId') eventId: string) {
