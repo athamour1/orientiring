@@ -20,7 +20,13 @@ export class ScansService {
       throw new BadRequestException('Invalid QR code');
     }
 
-    // 2. Check event is active and within time window
+    // 2. Verify the team belongs to this event
+    const teamMeta = await this.prisma.user.findUnique({ where: { id: teamId }, select: { eventId: true } });
+    if (teamMeta?.eventId && teamMeta.eventId !== checkpoint.eventId) {
+      throw new BadRequestException('This checkpoint does not belong to your event');
+    }
+
+    // 3. Check event is active and within time window
     if (!checkpoint.event.isActive) {
       throw new BadRequestException('Event is not currently active');
     }
