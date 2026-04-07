@@ -49,24 +49,26 @@
         <div class="text-subtitle2 text-weight-bold q-mb-xs">⏱ {{ $t('eventTimer') }}</div>
         <div class="text-caption text-grey-7 q-mb-sm">{{ $t('eventTimerDesc') }}</div>
 
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-sm-6">
-            <q-input
-              v-model="form.startTime"
-              :label="$t('startTime')"
-              outlined
-              type="datetime-local"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-sm-6">
-            <q-input
-              v-model="form.endTime"
-              :label="$t('endTime')"
-              outlined
-              type="datetime-local"
-              clearable
-            />
+        <div>
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-sm-6">
+              <q-input
+                v-model="form.startTime"
+                :label="$t('startTime')"
+                outlined
+                type="datetime-local"
+                clearable
+              />
+            </div>
+            <div class="col-12 col-sm-6">
+              <q-input
+                v-model="form.endTime"
+                :label="$t('endTime')"
+                outlined
+                type="datetime-local"
+                clearable
+              />
+            </div>
           </div>
         </div>
 
