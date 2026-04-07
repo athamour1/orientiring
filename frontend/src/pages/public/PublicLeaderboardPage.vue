@@ -1,6 +1,13 @@
 <template>
   <div class="public-lb-page relative-position">
-      <!-- Header -->
+    <q-btn
+      round flat
+      :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+      color="white"
+      class="dark-toggle"
+      @click="$q.dark.toggle()"
+    />
+    <!-- Header -->
     <div class="lb-header">
       <div class="lb-icon">🏆</div>
       <h1 class="lb-title">{{ eventName }}</h1>
@@ -50,8 +57,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import { useEventSocket } from 'src/composables/useEventSocket'
+
+const $q = useQuasar()
 
 const route = useRoute()
 const eventId = route.params.eventId
@@ -87,6 +97,14 @@ onMounted(async () => {
 
 <style scoped>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+.dark-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  opacity: 0.8;
+}
 
 .public-lb-page {
   min-height: 100vh;

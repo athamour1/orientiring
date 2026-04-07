@@ -1,5 +1,12 @@
 <template>
   <q-page class="flex flex-center login-page">
+    <q-btn
+      round flat
+      :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+      color="white"
+      class="dark-toggle"
+      @click="$q.dark.toggle()"
+    />
     <div class="main-card q-pa-xl shadow-up-10 rounded-borders">
       <div class="text-center q-mb-lg">
         <div class="row items-center justify-center q-gutter-sm q-mb-xs">
@@ -90,6 +97,14 @@ const onSubmit = async () => {
 .login-page {
   background: linear-gradient(145deg, #150b24 0%, #2a1060 50%, #8e5add 100%);
   min-height: 100vh;
+  position: relative;
+}
+.dark-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  opacity: 0.8;
 }
 body.body--light .login-page {
   background: linear-gradient(145deg, #f0ebff 0%, #d8c8ff 50%, #c4a0f5 100%);
