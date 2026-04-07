@@ -10,8 +10,8 @@
     <q-card flat bordered class="shadow-2 q-mb-lg overflow-hidden" style="border-radius:14px; position: relative;">
       <div id="admin-map" style="height: 320px; width: 100%;"></div>
       <div class="admin-zoom-btns">
-        <q-btn round unelevated color="white" text-color="dark" icon="add" size="sm" @click="map && map.zoomIn()" />
-        <q-btn round unelevated color="white" text-color="dark" icon="remove" size="sm" @click="map && map.zoomOut()" />
+        <q-btn round elevated color="white" text-color="dark" icon="add" size="sm" @click="map && map.zoomIn()" />
+        <q-btn round elevated color="white" text-color="dark" icon="remove" size="sm" @click="map && map.zoomOut()" />
       </div>
     </q-card>
 

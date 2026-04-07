@@ -20,8 +20,8 @@
 
     <!-- Zoom controls -->
     <div class="zoom-btns">
-      <q-btn round unelevated icon="add" color="white" text-color="grey-8" size="sm" class="shadow-4" @click="map.zoomIn()" />
-      <q-btn round unelevated icon="remove" color="white" text-color="grey-8" size="sm" class="shadow-4" @click="map.zoomOut()" />
+      <q-btn round elevated icon="add" color="white" text-color="grey-8" size="sm" @click="map.zoomIn()" />
+      <q-btn round elevated icon="remove" color="white" text-color="grey-8" size="sm" @click="map.zoomOut()" />
     </div>
 
     <!-- Layer picker -->

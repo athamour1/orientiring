@@ -15,9 +15,14 @@
         <q-badge :color="isConnected ? 'green' : 'grey'" :label="isConnected ? 'Live' : 'Offline'" class="q-pa-xs" />
       </q-card-section>
       <div id="admin-live-map" style="height: 380px; width: 100%; position: relative;">
+        <!-- Zoom controls -->
+        <div class="admin-zoom-btns">
+          <q-btn round elevated icon="add" color="white" text-color="grey-8" size="sm" @click="map.zoomIn()" />
+          <q-btn round elevated icon="remove" color="white" text-color="grey-8" size="sm" @click="map.zoomOut()" />
+        </div>
         <!-- Custom layer picker -->
         <div class="admin-layer-btn">
-          <q-btn round unelevated icon="layers" color="white" text-color="grey-8" size="sm" class="shadow-3">
+          <q-btn round elevated icon="layers" color="white" text-color="grey-8" size="sm">
             <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
               <q-list dense style="min-width:170px; padding: 6px;">
                 <q-item
@@ -387,7 +392,7 @@ function renderTeams(locations) {
 onMounted(async () => {
   await nextTick()
 
-  map = L.map('admin-live-map', { center: [0, 0], zoom: 2 })
+  map = L.map('admin-live-map', { center: [0, 0], zoom: 2, zoomControl: false })
   const pane = map.createPane('selectedTeamPane')
   pane.style.zIndex = 650
 
