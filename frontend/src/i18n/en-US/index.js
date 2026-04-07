@@ -28,6 +28,7 @@ export default {
   typeUsername: 'Please type your username',
   pinPassword: 'PIN / Password',
   typePassword: 'Please type your password',
+  keepMeLoggedIn: 'Keep me logged in',
   commenceHunt: 'Commence Hunt',
   loginSuccessful: 'Login successful',
   authFailed: 'Authentication failed',

@@ -34,7 +34,7 @@
           v-model="password"
           outlined
           color="primary"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           :placeholder="$t('pinPassword')"
           lazy-rules
           :rules="[val => val !== null && val !== '' || $t('typePassword')]"
@@ -42,9 +42,24 @@
           <template v-slot:prepend>
             <q-icon name="lock" color="primary" />
           </template>
+          <template v-slot:append>
+            <q-icon
+              :name="showPassword ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              color="grey-6"
+              @click="showPassword = !showPassword"
+            />
+          </template>
         </q-input>
 
-        <div class="q-mt-xl">
+        <q-checkbox
+          v-model="keepLoggedIn"
+          :label="$t('keepMeLoggedIn')"
+          color="primary"
+          class="q-mt-xs"
+        />
+
+        <div class="q-mt-md">
           <q-btn class="full-width" color="primary" text-color="white" :label="$t('commenceHunt')" type="submit" size="lg" unelevated no-caps />
         </div>
       </q-form>
@@ -64,11 +79,19 @@ const { t } = useI18n()
 const router = useRouter()
 const username = ref('')
 const password = ref('')
+const showPassword = ref(false)
+const keepLoggedIn = ref(false)
 
 const onSubmit = async () => {
   try {
     const res = await api.post('/auth/login', { username: username.value, password: password.value })
     localStorage.setItem('token', res.data.access_token)
+    if (!keepLoggedIn.value) {
+      localStorage.setItem('sessionOnly', 'true')
+      sessionStorage.setItem('sessionActive', 'true')
+    } else {
+      localStorage.removeItem('sessionOnly')
+    }
     if (res.data.role === 'ADMIN') {
       router.push('/admin')
     } else {

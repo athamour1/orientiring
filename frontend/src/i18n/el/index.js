@@ -28,6 +28,7 @@ export default {
   typeUsername: 'Παρακαλώ πληκτρολογήστε το όνομα χρήστη',
   pinPassword: 'PIN / Κωδικός',
   typePassword: 'Παρακαλώ πληκτρολογήστε τον κωδικό σας',
+  keepMeLoggedIn: 'Να με θυμάσαι',
   commenceHunt: 'Έναρξη Αναζήτησης',
   loginSuccessful: 'Επιτυχής σύνδεση',
   authFailed: 'Η πιστοποίηση απέτυχε',

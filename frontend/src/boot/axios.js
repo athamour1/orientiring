@@ -90,6 +90,14 @@ const scheduleProactiveRefresh = () => {
 }
 
 export default defineBoot(({ app }) => {
+  // If token was stored as session-only, clear it when the browser session ends
+  if (localStorage.getItem('token') && localStorage.getItem('sessionOnly') === 'true') {
+    if (!sessionStorage.getItem('sessionActive')) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('sessionOnly')
+    }
+  }
+
   app.config.globalProperties.$axios = axios
   app.config.globalProperties.$api = api
   scheduleProactiveRefresh()
