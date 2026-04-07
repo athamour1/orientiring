@@ -312,8 +312,14 @@ function renderTeams(locations) {
 
   visible.forEach(loc => {
     const color = teamHex(loc.team.id)
+    const isSelected = loc.team.id === selectedTeamId.value
     const dot = L.circleMarker([loc.latitude, loc.longitude], {
-      radius: 9, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9,
+      radius: isSelected ? 11 : 9,
+      color: '#fff',
+      weight: isSelected ? 3 : 2,
+      fillColor: color,
+      fillOpacity: 0.9,
+      pane: isSelected ? 'selectedTeamPane' : 'overlayPane',
     })
       .bindTooltip(`<b style="color:${color};">${loc.team.username}</b>`, {
         permanent: false, direction: 'top', offset: [0, -10], opacity: 0.95,
@@ -332,6 +338,8 @@ onMounted(async () => {
   await nextTick()
 
   map = L.map('admin-live-map', { center: [0, 0], zoom: 2 })
+  const pane = map.createPane('selectedTeamPane')
+  pane.style.zIndex = 650
 
   const streetTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' })
   const topoTile = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenTopoMap' })
