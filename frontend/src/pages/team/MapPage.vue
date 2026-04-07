@@ -20,7 +20,7 @@
 
     <!-- Layer picker -->
     <q-btn round unelevated icon="layers" color="white" text-color="grey-8" size="md" class="layer-btn shadow-4">
-      <q-menu anchor="top left" self="bottom left" :offset="[0, 8]">
+      <q-menu anchor="bottom right" self="top right" :offset="[0, 8]">
         <q-list dense style="min-width:160px">
           <q-item-label header class="text-caption text-weight-bold">{{ $t('mapLayer') }}</q-item-label>
           <q-item v-for="layer in baseLayers" :key="layer.name" clickable @click="switchBase(layer)" v-close-popup>
@@ -347,7 +347,7 @@ const fetchEvent = async () => {
 /* Map control buttons */
 .layer-btn {
   position: absolute;
-  bottom: 80px;
+  top: 16px;
   right: 16px;
   z-index: 1000;
 }
