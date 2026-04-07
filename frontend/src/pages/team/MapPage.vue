@@ -104,23 +104,27 @@ onMounted(async () => {
   await fetchEvent()
   eventInterval = setInterval(fetchEvent, 30000)
 
-  if (navigator.geolocation && activeEvent.value?.showTeamLocation !== false) {
-    watchId = navigator.geolocation.watchPosition(onPosition, () => {}, { enableHighAccuracy: true })
+  // Always track GPS — admin needs location data even when showTeamLocation is off
+  if (navigator.geolocation) {
+    watchId = navigator.geolocation.watchPosition(onPosition, (err) => { console.error(err) }, { enableHighAccuracy: true })
   }
 })
 
 async function onPosition(pos) {
   const { latitude, longitude } = pos.coords
 
-  if (!userMarker.value) {
-    userMarker.value = L.circleMarker([latitude, longitude], {
-      color: '#1565c0', fillColor: '#1e88e5', fillOpacity: 0.9, radius: 10, weight: 3
-    }).bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
-    if (markers.value.length === 0) {
-      map.value.setView([latitude, longitude], 16)
+  // Only show team's own dot on their map if admin hasn't hidden locations
+  if (activeEvent.value?.showTeamLocation !== false) {
+    if (!userMarker.value) {
+      userMarker.value = L.circleMarker([latitude, longitude], {
+        color: '#1565c0', fillColor: '#1e88e5', fillOpacity: 0.9, radius: 10, weight: 3
+      }).bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
+      if (markers.value.length === 0) {
+        map.value.setView([latitude, longitude], 16)
+      }
+    } else {
+      userMarker.value.setLatLng([latitude, longitude])
     }
-  } else {
-    userMarker.value.setLatLng([latitude, longitude])
   }
 
   const now = Date.now()
@@ -154,16 +158,12 @@ const fetchEvent = async () => {
       localStorage.setItem('appLang', res.data.language)
     }
 
-    // Respect showTeamLocation toggle — start/stop GPS watch if setting changed
-    if (navigator.geolocation) {
-      const shouldTrack = activeEvent.value?.showTeamLocation !== false
-      const isTracking = watchId !== null
-      if (shouldTrack && !isTracking) {
-        watchId = navigator.geolocation.watchPosition(onPosition, () => {}, { enableHighAccuracy: true })
-      } else if (!shouldTrack && isTracking) {
-        navigator.geolocation.clearWatch(watchId)
-        watchId = null
-        if (userMarker.value) { map.value?.removeLayer(userMarker.value); userMarker.value = null }
+    // showTeamLocation only controls visibility of the team's own dot on their map
+    // GPS is always sent to the server so the admin can always track teams
+    if (userMarker.value) {
+      if (activeEvent.value?.showTeamLocation === false) {
+        map.value?.removeLayer(userMarker.value)
+        userMarker.value = null
       }
     }
 
