@@ -1,11 +1,11 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center lb-page">
     <div class="full-width max-w-sm q-pa-md">
       <div class="main-card q-pa-md shadow-up-10 rounded-borders">
         <div class="text-center q-mb-md">
           <q-icon name="emoji_events" size="3rem" color="warning" />
-          <h4 class="text-h5 text-weight-bold text-dark q-mt-sm q-mb-none tracking-tight">{{ $t('liveLeaderboard') }}</h4>
-          <p class="text-subtitle2 text-grey-8 opacity-80">{{ $t('updatedRealtime') }}</p>
+          <h4 class="text-h5 text-weight-bold text-white q-mt-sm q-mb-none tracking-tight">{{ $t('liveLeaderboard') }}</h4>
+          <p class="text-subtitle2 text-white opacity-80">{{ $t('updatedRealtime') }}</p>
         </div>
 
         <q-list separator class="q-mt-lg">
@@ -16,7 +16,7 @@
                 </q-avatar>
              </q-item-section>
              <q-item-section>
-               <q-item-label class="text-weight-bold text-dark text-subtitle1">{{ team.teamName }}</q-item-label>
+               <q-item-label class="text-weight-bold text-white text-subtitle1">{{ team.teamName }}</q-item-label>
              </q-item-section>
              <q-item-section side>
                <q-chip color="primary" text-color="white" class="text-weight-bold text-subtitle1" icon="star">
@@ -25,7 +25,7 @@
              </q-item-section>
           </q-item>
         </q-list>
-        <div v-if="leaderboard.length === 0" class="text-center text-grey-8 opacity-80 q-my-xl">
+        <div v-if="leaderboard.length === 0" class="text-center text-white opacity-80 q-my-xl">
           {{ $t('noTeamsScored') }}
         </div>
       </div>
@@ -81,14 +81,16 @@ const getBadgeColor = (index) => {
 </script>
 
 <style scoped>
-.main-card {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+.lb-page {
+  background: linear-gradient(160deg, #150b24 0%, #2a1060 45%, #8e5add 100%);
+  min-height: 100%;
 }
-body.body--dark .main-card {
-  background: var(--q-dark);
-  border-color: rgba(255, 255, 255, 0.08);
+.main-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  color: #fff;
 }
 .opacity-80 { opacity: 0.8; }
 .max-w-sm { max-width: 500px; margin: 0 auto; }

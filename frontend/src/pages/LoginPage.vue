@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center login-page">
     <div class="main-card q-pa-xl shadow-up-10 rounded-borders">
       <div class="text-center q-mb-lg">
         <div class="row items-center justify-center q-gutter-sm q-mb-xs">
@@ -87,6 +87,14 @@ const onSubmit = async () => {
 </script>
 
 <style scoped>
+.login-page {
+  background: linear-gradient(145deg, #150b24 0%, #2a1060 50%, #8e5add 100%);
+  min-height: 100vh;
+}
+body.body--light .login-page {
+  background: linear-gradient(145deg, #f0ebff 0%, #d8c8ff 50%, #c4a0f5 100%);
+}
+
 .main-card {
   width: 100%;
   max-width: 400px;

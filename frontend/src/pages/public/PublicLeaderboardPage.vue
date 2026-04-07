@@ -90,9 +90,9 @@ onMounted(async () => {
 
 .public-lb-page {
   min-height: 100vh;
-  background: #f5f3ff;
+  background: linear-gradient(160deg, #150b24 0%, #2a1060 45%, #8e5add 100%);
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  color: var(--q-dark);
+  color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -113,14 +113,14 @@ onMounted(async () => {
 }
 .lb-subtitle {
   font-size: 0.92rem;
-  color: rgba(0,0,0,0.65);
+  color: rgba(255,255,255,0.7);
   margin-bottom: 4px;
 }
 .live-dot {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.1);
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 0.82rem;
@@ -148,8 +148,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
   border-radius: 14px;
   padding: 14px 18px;
   margin-bottom: 10px;
@@ -161,7 +161,7 @@ onMounted(async () => {
 .lb-row.bronze { background: rgba(205,127,50,0.12); border-color: rgba(205,127,50,0.4); }
 
 .rank { font-size: 1.5rem; min-width: 36px; text-align: center; }
-.rank-num { font-size: 1rem; font-weight: 700; color: rgba(0,0,0,0.55); }
+.rank-num { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.55); }
 .team-name { flex: 1; font-size: 1.05rem; font-weight: 600; }
 .score { font-size: 1rem; font-weight: 700; color: var(--q-warning); display: flex; align-items: center; gap: 4px; }
 .star { font-size: 0.85rem; }
@@ -169,7 +169,7 @@ onMounted(async () => {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: rgba(0,0,0,0.5);
+  color: rgba(255,255,255,0.5);
 }
 .empty-icon { font-size: 3rem; margin-bottom: 12px; }
 
@@ -191,5 +191,5 @@ onMounted(async () => {
 }
 .copy-btn:hover { opacity: 0.88; }
 .copied-note { color: var(--q-positive); font-size: 0.85rem; }
-.refresh-note { font-size: 0.75rem; color: rgba(0,0,0,0.35); }
+.refresh-note { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
 </style>
