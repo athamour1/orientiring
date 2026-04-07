@@ -101,21 +101,36 @@ const onError = () => {
 .scan-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100dvh;
   background: #000;
   overflow: hidden;
 }
 
 .camera-area {
   position: relative;
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
 }
 
 .camera-stream {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+}
+
+/* Pierce into QrcodeStream's internal elements */
+.camera-stream :deep(video),
+.camera-stream :deep(canvas) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
+}
+
+/* The wrapper div QrcodeStream renders */
+.camera-stream :deep(> div) {
+  width: 100%;
+  height: 100%;
 }
 
 .camera-error {
