@@ -2,14 +2,18 @@
   <q-page class="relative-position" style="overflow: hidden;">
     <div id="map" class="absolute-full"></div>
 
-    <!-- Completion Banner -->
-    <transition name="slide-down">
-      <div v-if="allDone" class="completion-banner" @click="bannerDismissed = true">
+    <!-- Completion Banner — above footer -->
+    <transition name="slide-up">
+      <div v-if="allDone && !bannerDismissed" class="completion-banner">
         <div class="banner-inner">
-          <div class="trophy">🏆</div>
-          <div class="banner-title">{{ $t('allCheckpointsDone') }}</div>
-          <div class="banner-sub">{{ $t('headBackToStart') }}</div>
-          <div class="banner-hint">{{ $t('tapToDismiss') }}</div>
+          <div class="banner-left">
+            <span class="trophy">🏆</span>
+            <div>
+              <div class="banner-title">{{ $t('allCheckpointsDone') }}</div>
+              <div class="banner-sub">{{ $t('headBackToStart') }}</div>
+            </div>
+          </div>
+          <q-btn flat round dense icon="close" color="white" @click.stop="bannerDismissed = true" />
         </div>
       </div>
     </transition>
@@ -286,11 +290,11 @@ const fetchEvent = async () => {
       const scannedCount = activeEvent.value.scannedCheckpointIds?.length ?? 0
       const nowDone = totalCps > 0 && scannedCount >= totalCps
 
-      if (nowDone !== allDone.value) {
-        // Status changed: reset dismiss so banner re-shows
+      if (nowDone && !allDone.value) {
+        // Just completed — reset dismiss so banner shows
         bannerDismissed.value = false
       }
-      allDone.value = nowDone && !bannerDismissed.value
+      allDone.value = nowDone
 
       // Gold user marker when finished
       if (userMarker.value) {
@@ -353,41 +357,36 @@ const fetchEvent = async () => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-/* Completion banner */
+/* Completion banner — sits just above the bottom tab bar (58px) */
 .completion-banner {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  bottom: 66px;
+  left: 12px;
+  right: 12px;
   z-index: 1000;
-  display: flex;
-  justify-content: center;
-  padding: 12px 16px 0;
   pointer-events: auto;
 }
 .banner-inner {
   background: linear-gradient(135deg, #1b5e20, #2e7d32);
   color: #fff;
-  border-radius: 16px;
-  padding: 16px 24px;
-  text-align: center;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-  animation: bannerPulse 2s ease-in-out infinite;
-  max-width: 340px;
-  width: 100%;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
 }
-.trophy { font-size: 2.5rem; margin-bottom: 4px; }
-.banner-title { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
-.banner-sub { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
-.banner-hint { font-size: 0.7rem; opacity: 0.55; margin-top: 8px; }
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.trophy { font-size: 1.8rem; line-height: 1; }
+.banner-title { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; }
+.banner-sub { font-size: 0.78rem; opacity: 0.85; margin-top: 1px; }
 
-@keyframes bannerPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
-  50%       { transform: scale(1.02); box-shadow: 0 8px 32px rgba(46,125,50,0.7); }
-}
-
-.slide-down-enter-active { animation: slideIn 0.4s ease; }
-.slide-down-leave-active { animation: slideIn 0.3s ease reverse; }
-@keyframes slideIn {
-  from { transform: translateY(-100%); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
+.slide-up-enter-active { transition: transform 0.35s ease, opacity 0.35s ease; }
+.slide-up-leave-active { transition: transform 0.25s ease, opacity 0.25s ease; }
+.slide-up-enter-from  { transform: translateY(40px); opacity: 0; }
+.slide-up-leave-to    { transform: translateY(40px); opacity: 0; }
 </style>
