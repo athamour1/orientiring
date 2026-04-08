@@ -118,7 +118,7 @@
         <div class="text-subtitle1 text-weight-bold">{{ $t('language') }}</div>
       </div>
       <q-btn-toggle
-        v-model="appLang"
+        v-model="form.language"
         unelevated
         rounded
         toggle-color="primary"
@@ -126,7 +126,6 @@
           { label: $t('english'), value: 'en-US' },
           { label: $t('greek'),   value: 'el' },
         ]"
-        @update:model-value="applyLang"
       />
     </q-card>
 
@@ -220,12 +219,9 @@ import 'leaflet/dist/leaflet.css'
 const eventsStore = useEventsStore()
 
 const $q = useQuasar()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
-const appLang = ref(localStorage.getItem('appLang') || 'en-US')
 const applyLang = (lang) => {
-  locale.value = lang
-  localStorage.setItem('appLang', lang)
   form.value.language = lang
 }
 const route = useRoute()
