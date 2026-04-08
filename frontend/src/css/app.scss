@@ -21,34 +21,34 @@ body.body--dark {
 
 // ── Flat / borderless UI (dark mode) ────────────────────────────────────────
 
-// Header — no shadow, flush with page background
+// Header — sits one level above the page
 .body--dark .q-header {
-  background-color: $dark-page !important;
+  background-color: #221340 !important;
   box-shadow: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-bottom: 1px solid rgba($primary, 0.18) !important;
 }
 .body--dark .q-toolbar {
-  background-color: $dark-page !important;
+  background-color: #221340 !important;
 }
 
-// Cards — flat, subtle border instead of shadow
+// Cards — mid surface, slightly above page
 .body--dark .q-card {
   background-color: $dark !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba($primary, 0.12) !important;
   box-shadow: none !important;
 }
 
-// Footer
+// Footer — matches header
 .body--dark .q-footer {
-  background-color: $dark-page !important;
+  background-color: #221340 !important;
   box-shadow: none !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-top: 1px solid rgba($primary, 0.18) !important;
 }
 
-// Drawer — same tone as header
+// Drawer — matches header, purple-tinted
 .body--dark .q-drawer {
-  background-color: $dark-page !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background-color: #1c0f38 !important;
+  border-right: 1px solid rgba($primary, 0.18) !important;
   box-shadow: none !important;
 }
 

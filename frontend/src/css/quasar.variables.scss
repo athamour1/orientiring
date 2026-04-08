@@ -13,5 +13,7 @@ $info      : #a67ce8;   // purple-tinted info
 $warning   : #f0a832;
 
 // ── Dark mode surfaces ────────────────────────────────────────────────────────
-$dark      : #1e1030;   // deep purple-black — sidebar / header
-$dark-page : #150b24;   // darkest — page background
+// Three-level hierarchy (darkest → lightest):
+//   page (#0f0820) → card/input (#1a1030) → header/drawer (#221340)
+$dark      : #1a1030;   // mid surface — cards, inputs
+$dark-page : #0f0820;   // darkest — page background
