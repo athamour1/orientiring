@@ -53,6 +53,15 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
   error "Tag $TAG already exists! Choose a different version."
 fi
 
+# ─── Bump version in package.json ───────────────────────────────────────────
+info "Bumping frontend/package.json to ${VERSION}..."
+cd frontend
+npm version "$VERSION" --no-git-tag-version --allow-same-version
+cd ..
+git add frontend/package.json
+git commit -m "chore(release): bump version to ${VERSION}"
+ok "Version bumped and committed"
+
 # ─── Confirmation ───────────────────────────────────────────────────────────────
 echo ""
 info "This will:"
