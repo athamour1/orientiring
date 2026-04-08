@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr fFf">
-    <q-header elevated class="bg-primary text-white">
+    <q-header class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title class="text-weight-bold tracking-tight row items-center q-gutter-xs">
           <img src="/favicon.svg" alt="Oriento" style="width:28px;height:28px;vertical-align:middle;" />
@@ -29,7 +29,7 @@
       <router-view />
     </q-page-container>
 
-    <q-footer bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'" class="shadow-up-2">
+    <q-footer bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
       <q-tabs no-caps active-color="primary" indicator-color="transparent" align="justify" class="text-grey-7" v-model="tab">
         <q-route-tab name="map" icon="map" :label="$t('map')" to="/team/map" exact />
         <q-route-tab v-if="!teamEventStore.allDone" name="scan" icon="qr_code_scanner" :label="$t('scanner')" to="/team/scan" exact />

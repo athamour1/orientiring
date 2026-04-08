@@ -19,27 +19,37 @@ body.body--dark {
   color: color.adjust($accent, $lightness: 20%);
 }
 
-// Cards
-.body--dark .q-card {
-  background-color: color.adjust($dark, $lightness: 5%) !important;
-  border-color: rgba($primary, 0.18) !important;
+// ── Flat / borderless UI (dark mode) ────────────────────────────────────────
+
+// Header — no shadow, flush with page background
+.body--dark .q-header {
+  background-color: $dark-page !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.body--dark .q-toolbar {
+  background-color: $dark-page !important;
 }
 
-// Header / toolbar
-.body--dark .q-header,
-.body--dark .q-toolbar {
+// Cards — flat, subtle border instead of shadow
+.body--dark .q-card {
   background-color: $dark !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
 }
 
 // Footer
 .body--dark .q-footer {
-  background-color: $dark !important;
-  border-top: 1px solid rgba($primary, 0.2);
+  background-color: $dark-page !important;
+  box-shadow: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-// Drawer
+// Drawer — same tone as header
 .body--dark .q-drawer {
-  background-color: $dark !important;
+  background-color: $dark-page !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
 }
 
 // Table row hover
