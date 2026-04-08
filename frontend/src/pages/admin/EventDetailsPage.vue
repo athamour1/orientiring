@@ -72,7 +72,10 @@
               </div>
             </div>
             <q-input v-model.number="form.pointValue" :label="$t('pointValueReward')" type="number" outlined :rules="[val => !!val || 'Required']" />
-            <q-input v-model.number="form.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined :hint="$t('bonusForFirstHint')" />
+            <div>
+              <q-toggle v-model="formBonusEnabled" :label="$t('bonusForFirst')" color="primary" @update:model-value="val => { if (!val) form.bonusForFirst = 0 }" />
+              <q-input v-if="formBonusEnabled" v-model.number="form.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined :hint="$t('bonusForFirstHint')" class="q-mt-sm" />
+            </div>
             <q-btn flat color="secondary" icon="my_location" :label="$t('useGps')" @click="getCurrentLocation" class="full-width" no-caps />
             <div class="row justify-end q-mt-lg q-gutter-sm">
               <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
@@ -117,8 +120,9 @@
                 <div class="col-6">
                   <q-input v-model.number="editForm.pointValue" :label="$t('pointValueReward')" type="number" outlined :rules="[val => !!val || 'Required']" />
                 </div>
-                <div class="col-6">
-                  <q-input v-model.number="editForm.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined />
+                <div class="col-12">
+                  <q-toggle v-model="editBonusEnabled" :label="$t('bonusForFirst')" color="primary" @update:model-value="val => { if (!val) editForm.bonusForFirst = 0 }" />
+                  <q-input v-if="editBonusEnabled" v-model.number="editForm.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined class="q-mt-sm" />
                 </div>
               </div>
             </div>
@@ -174,7 +178,9 @@ const editDialog = ref(false)
 const previewCp = ref(null)
 const previewUrl = ref('')
 const form = ref({ name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
+const formBonusEnabled = ref(false)
 const editForm = ref({ id: null, name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 })
+const editBonusEnabled = ref(false)
 const baseLayers = ref([])
 const activeBaseName = ref('street')
 let currentBaseTile = null
@@ -196,6 +202,7 @@ const columns = computed(() => [
   { name: 'latitude', label: t('lat'), align: 'left', field: 'latitude' },
   { name: 'longitude', label: t('lng'), align: 'left', field: 'longitude' },
   { name: 'pointValue', label: 'Pts', align: 'center', field: 'pointValue', sortable: true },
+  { name: 'bonusForFirst', label: t('bonusForFirst'), align: 'center', field: 'bonusForFirst', sortable: true },
   { name: 'actions', label: 'QR', align: 'right' }
 ])
 
@@ -275,6 +282,7 @@ const fetchCheckpoints = async () => {
 
 const openEditDialog = async (cp) => {
   editForm.value = { id: cp.id, name: cp.name, latitude: cp.latitude, longitude: cp.longitude, pointValue: cp.pointValue, bonusForFirst: cp.bonusForFirst ?? 0 }
+  editBonusEnabled.value = (cp.bonusForFirst ?? 0) > 0
   editDialog.value = true
   await nextTick()
   if (editMap) { editMap.remove(); editMap = null; editMarker = null }
@@ -330,6 +338,7 @@ const createCheckpoint = async () => {
     await api.post(`/admin/events/${eventId}/checkpoints`, form.value)
     showDialog.value = false
     form.value = { name: '', latitude: null, longitude: null, pointValue: 10, bonusForFirst: 0 }
+    formBonusEnabled.value = false
     fetchCheckpoints()
   } catch (err) { console.error(err) }
 }
