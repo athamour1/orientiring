@@ -284,7 +284,7 @@ function makeUserIcon(deg) {
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                fill="none"
+                fill="#c4a0f5"
                 opacity="${arrowOpacity}"/>
             </g>
           </g>
