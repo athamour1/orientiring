@@ -1,82 +1,89 @@
 # 🧭 Oriento
 
-**Oriento** is a comprehensive, open-source Orienteering and Scavenger Hunt management platform built for the modern web. It enables game administrators to seamlessly design, launch, and monitor live geospatial scavenger hunts while providing participating teams with a native-feeling Progressive Web App (PWA) to navigate maps, scan QR codes, and compete on live leaderboards.
+**Oriento** is an open-source orienteering and scavenger hunt management platform built for the modern web. Administrators design, launch and monitor live geospatial scavenger hunts while teams use a native-feeling Progressive Web App to navigate maps, scan QR checkpoints and compete on live leaderboards.
 
-![Oriento Banner](./frontend/public/icons/favicon-128x128.png) <!-- Update with a real banner if available! -->
+🌐 **[Live Landing Page](https://athamour1.github.io/orientiring/)** &nbsp;|&nbsp; ⭐ **[GitHub](https://github.com/athamour1/orientiring)**
+
+---
 
 ## ✨ Features
 
-- **🗺️ Interactive Team Navigation**: Real-time Leaflet map integration displaying custom boundaries and active checkpoints.
-- **📸 Built-in QR Scanner**: Seamless device camera API utilizing context-aware scanning capabilities for checkpoint validation.
-- **🏆 Live Leaderboards**: Real-time score aggregation, visible both privately to teams and securely via dynamic public share links.
-- **📱 Progressive Web App (PWA)**: Installable directly to user home screens natively on iOS/Android, equipped with offline service worker infrastructure.
-- **🌍 Internationalization (i18n)**: Out-of-the-box native localization support for both **English** (en-US) and **Greek** (el).
-- **🌗 Dark Mode Compatibility**: Fluid UI rendering that beautifully adapts across the entire application interface to match user system presets.
-- **👑 Admin Orchestration**: Full event management dashboard supporting draft planning, draft launches, team password-generation, and full live telemetry monitoring of all active teams.
+- **🗺️ Interactive Team Maps** — Real-time Leaflet map with checkpoints, GPS dot, multiple tile layers (street, topo, satellite) and a return-point flag on completion.
+- **📸 QR Checkpoint Scanning** — Continuous camera scanning validates checkpoints instantly. Admins download and print all QRs in one click.
+- **🏆 Live Leaderboards** — Scores update the moment a team scans via WebSockets. Share a public link with spectators — no login required.
+- **📍 Real-time GPS Tracking** — Admin map shows all team positions live with route history and a filterable activity feed.
+- **⏱️ Event Timer** — Set start/end times. Events auto-activate at start time, scans are rejected after end time, and a countdown is shown to all teams.
+- **🥇 Bonus Point System** — Award extra points to the first team to scan each checkpoint and to the first team to finish the entire hunt.
+- **📱 Progressive Web App (PWA)** — Installable directly to home screens on iOS and Android. No app store required.
+- **🌗 Dark Mode & i18n** — Full dark mode. Built-in English and Greek localization with per-event language preference for teams.
+- **👑 Admin Dashboard** — Create events, manage teams, drag checkpoint markers on a map, view live activity feeds and checkpoint progression all from one place.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: [Vue 3](https://vuejs.org/) + [Quasar Framework](https://quasar.dev/) (Vite)
-- **Backend**: [NestJS](https://nestjs.com/) (Express/TypeScript)
-- **Database**: [PostgreSQL 15](https://www.postgresql.org/)
-- **ORM**: [Prisma](https://www.prisma.io/)
-- **Infrastructure**: Fully Dockerized & ready for GitHub Container Registry (GHCR) deployments.
+| Layer | Technology |
+|---|---|
+| Frontend | Vue 3 + Quasar Framework (Vite) |
+| Backend | NestJS (TypeScript) |
+| Database | PostgreSQL 15 |
+| ORM | Prisma |
+| Real-time | Socket.IO |
+| Maps | Leaflet |
+| Infrastructure | Docker + Docker Compose |
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🚀 Getting Started
 
-The fastest way to boot the ecosystem locally is using Docker Compose.
+The fastest way to boot the stack locally is Docker Compose.
 
 ### Prerequisites
 - [Docker](https://docs.docker.com/engine/install/) & Docker Compose
-- Node.js `22.x` (if venturing outside the container wrapper)
 
 ### Setup
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/oriento.git
-   cd oriento
-   ```
+```bash
+# 1. Clone
+git clone https://github.com/athamour1/orientiring.git
+cd orientiring
 
-2. **Spin up the environment:**
-   ```bash
-   docker compose up --build
-   ```
-   *This command provisions the PostgreSQL database, applies Prisma migrations, injects initial seed data, and boots both the NestJS server and Quasar dev environments.*
+# 2. Start everything
+docker compose up --build
+```
 
-3. **Access the application:**
-   - **Frontend (PWA Mode):** [http://localhost:9000](http://localhost:9000)
-   - **Backend API:** [http://localhost:3000](http://localhost:3000)
+This provisions PostgreSQL, applies Prisma migrations, seeds initial data and boots both the NestJS API and Quasar PWA dev server.
 
-**Default Admin Credentials:**
-- **Username:** `admin`
-- **Password:** `admin123`
+### Access
+
+| Service | URL |
+|---|---|
+| Frontend (PWA) | http://localhost:9000 |
+| Backend API | http://localhost:3000 |
+
+**Default admin credentials:** `admin` / `admin123`
 
 ---
 
 ## 🚢 Production Deployment
 
-Oriento is designed for scalable production deployment using modern container registries like GHCR. 
+Oriento is designed for Docker-based production deployments.
 
-1. Ensure the `docker-compose.prod.yml` file is configured with your secure `JWT_SECRET` and appropriate domain `CORS_ORIGIN`.
-2. Generate optimized production images via Docker build commands referencing the internal `Dockerfile` mappings for both Frontend and Backend.
-3. Deploy securely to your VPS utilizing Nginx for reverse-proxy routing.
-
-*See [`ghcr_deployment_guide.md`](./ghcr_deployment_guide.md) (if present) for granular step-by-step CI/CD pipeline strategies.*
+1. Copy and configure `docker-compose.prod.yml` with your `JWT_SECRET` and `CORS_ORIGIN`.
+2. Build production images and push to your registry (e.g. GHCR).
+3. Deploy behind an Nginx reverse proxy on your VPS.
 
 ---
 
-## 🏗️ Architecture Nuances
+## 🏗️ Architecture Notes
 
-- **Database Cascade Deletion**: Deleting an Event natively propagates a hard cascade wipe to the PostgreSQL cluster—successfully destroying all associated temporary teams, logs, scans, and telemetry dots attached to that hunt ID to ensure completely sanitized game resets.
-- **Install Prompt State Tracking**: The platform natively tracks and persists manual dismissals of the PWA install prompt utilizing localized `sessionStorage`, guaranteeing players and audiences are not spammed.
-- **Hot-Reloading Over Docker**: The `CHOKIDAR_USEPOLLING=true` flag is explicitly forced through the Dev Compose build to ensure Vite hot-reloading smoothly penetrates Docker volume limits.
+- **Cascade deletion** — Deleting an event wipes all associated teams, scans, checkpoints and GPS data.
+- **Auto-activation** — A server-side cron job activates events automatically when `startTime` is reached.
+- **Per-checkpoint bonuses** — First-scan bonuses are tracked and correctly reflected in leaderboard scores.
+- **Hot-reload in Docker** — `CHOKIDAR_USEPOLLING=true` ensures Vite HMR works inside Docker volumes.
 
 ---
 
 ## 📄 License
-This project is completely open source and available under the [MIT License](LICENSE).
+
+MIT — see [LICENSE](LICENSE).
