@@ -89,17 +89,60 @@ const scheduleProactiveRefresh = () => {
   }, 50 * 60 * 1000) // every 50 minutes
 }
 
-export default defineBoot(({ app }) => {
+// ── Cross-tab session sync via BroadcastChannel ───────────────────────────────
+// sessionStorage is per-tab, so a new tab doesn't inherit "sessionActive".
+// We use BroadcastChannel: new tabs ask existing tabs if a session is alive,
+// and any existing tab responds immediately so the new tab can set the flag
+// before the session-only check runs.
+const SESSION_CHANNEL = 'oriento_session'
+let sessionChannel = null
+
+const initSessionChannel = () => {
+  if (!('BroadcastChannel' in window)) return
+  sessionChannel = new BroadcastChannel(SESSION_CHANNEL)
+  sessionChannel.onmessage = (e) => {
+    if (e.data === 'session-query' && sessionStorage.getItem('sessionActive')) {
+      sessionChannel.postMessage('session-alive')
+    }
+  }
+}
+
+const querySessionFromOtherTabs = () => {
+  return new Promise((resolve) => {
+    if (!('BroadcastChannel' in window)) { resolve(false); return }
+    const ch = new BroadcastChannel(SESSION_CHANNEL)
+    const timer = setTimeout(() => { ch.close(); resolve(false) }, 150)
+    ch.onmessage = (e) => {
+      if (e.data === 'session-alive') {
+        clearTimeout(timer)
+        ch.close()
+        resolve(true)
+      }
+    }
+    ch.postMessage('session-query')
+  })
+}
+
+export default defineBoot(async ({ app }) => {
+  initSessionChannel()
+
   // If token was stored as session-only, clear it when the browser session ends.
-  // Skip this in standalone PWA mode — the OS killing the app process wipes
-  // sessionStorage, so session-only logic would log users out on every reopen.
+  // Skip in standalone PWA mode — the OS kills the process and wipes sessionStorage,
+  // which would log users out on every reopen.
   const isStandalone =
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true
+
   if (!isStandalone && localStorage.getItem('token') && localStorage.getItem('sessionOnly') === 'true') {
     if (!sessionStorage.getItem('sessionActive')) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('sessionOnly')
+      // Ask other open tabs if a session is alive (handles links opening in new tabs)
+      const alive = await querySessionFromOtherTabs()
+      if (alive) {
+        sessionStorage.setItem('sessionActive', 'true')
+      } else {
+        localStorage.removeItem('token')
+        localStorage.removeItem('sessionOnly')
+      }
     }
   }
 
