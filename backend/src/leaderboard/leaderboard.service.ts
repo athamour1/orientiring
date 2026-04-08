@@ -22,7 +22,7 @@ export class LeaderboardService {
       }),
       this.prisma.event.findUnique({
         where: { id: eventId },
-        select: { name: true, description: true, firstFinishBonus: true, firstFinishBonusAwardedToId: true },
+        select: { name: true, description: true, firstFinishBonus: true, firstFinishBonusAwardedToId: true, startTime: true, endTime: true },
       }),
     ]);
 
@@ -34,6 +34,21 @@ export class LeaderboardService {
       scoresMap.get(scan.teamId)!.score += scan.checkpoint.pointValue;
     }
 
+    // Per-checkpoint first-scan bonus: find the earliest scan per checkpoint
+    // and credit its team with the bonusForFirst value
+    const byCheckpoint = new Map<number, { teamId: number; scannedAt: Date; bonus: number }>();
+    for (const scan of scans) {
+      if (!scan.checkpoint.bonusForFirst) continue;
+      const cur = byCheckpoint.get(scan.checkpointId);
+      if (!cur || scan.scannedAt < cur.scannedAt) {
+        byCheckpoint.set(scan.checkpointId, { teamId: scan.teamId, scannedAt: scan.scannedAt, bonus: scan.checkpoint.bonusForFirst });
+      }
+    }
+    for (const { teamId, bonus } of byCheckpoint.values()) {
+      const entry = scoresMap.get(teamId);
+      if (entry) entry.score += bonus;
+    }
+
     if (event?.firstFinishBonus && event.firstFinishBonusAwardedToId) {
       const winner = scoresMap.get(event.firstFinishBonusAwardedToId);
       if (winner) winner.score += event.firstFinishBonus;
@@ -43,6 +58,8 @@ export class LeaderboardService {
     const result = {
       eventName: event?.name ?? 'Event',
       eventDescription: event?.description ?? '',
+      startTime: event?.startTime ?? null,
+      endTime: event?.endTime ?? null,
       leaderboard,
     };
 

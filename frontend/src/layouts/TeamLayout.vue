@@ -6,6 +6,15 @@
           <img src="/favicon.svg" alt="Oriento" style="width:28px;height:28px;vertical-align:middle;" />
           <span>Oriento</span>
         </q-toolbar-title>
+        <q-chip
+          v-if="timerVisible"
+          dense
+          :color="timerColor"
+          text-color="white"
+          icon="timer"
+          class="q-mr-xs text-weight-bold"
+          style="font-size:0.72rem;"
+        >{{ timerLabel }}</q-chip>
         <q-btn v-if="isInstallable" flat dense round icon="download" @click="promptInstall">
           <q-tooltip>{{ $t('installApp') }}</q-tooltip>
         </q-btn>
@@ -31,13 +40,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import { usePwaInstall } from 'src/composables/usePwaInstall'
 import { useTeamEventStore } from 'src/stores/teamEvent'
+import { useEventTimer } from 'src/composables/useEventTimer'
 const teamEventStore = useTeamEventStore()
+const startTime = computed(() => teamEventStore.startTime)
+const endTime = computed(() => teamEventStore.endTime)
+const { timerLabel, timerColor, timerVisible } = useEventTimer(startTime, endTime)
 
 const $q = useQuasar()
 const router = useRouter()

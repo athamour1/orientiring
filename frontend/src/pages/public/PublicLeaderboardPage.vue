@@ -14,6 +14,9 @@
       <p class="lb-subtitle" v-if="eventDescription">{{ eventDescription }}</p>
       <p class="lb-subtitle">{{ $t('liveRankings') }}</p>
       <div class="live-dot"><span class="dot"></span> {{ $t('live') }}</div>
+      <div v-if="timerVisible" class="timer-chip" :class="`timer-${timerColor}`">
+        <span class="timer-icon">⏱</span> {{ timerLabel }}
+      </div>
     </div>
 
     <!-- Board -->
@@ -60,6 +63,7 @@ import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import { useEventSocket } from 'src/composables/useEventSocket'
+import { useEventTimer } from 'src/composables/useEventTimer'
 
 const $q = useQuasar()
 
@@ -70,6 +74,9 @@ const leaderboard = ref([])
 const eventName = ref('')
 const eventDescription = ref('')
 const copied = ref(false)
+const startTime = ref(null)
+const endTime = ref(null)
+const { timerLabel, timerColor, timerVisible } = useEventTimer(startTime, endTime)
 
 const fetchLeaderboard = async () => {
   try {
@@ -77,6 +84,8 @@ const fetchLeaderboard = async () => {
     leaderboard.value = res.data.leaderboard
     eventName.value = res.data.eventName
     eventDescription.value = res.data.eventDescription
+    startTime.value = res.data.startTime ?? null
+    endTime.value = res.data.endTime ?? null
   } catch {
     // Non-critical failure — UI shows stale data
   }
@@ -224,4 +233,22 @@ body.body--dark .refresh-note { color: rgba(255,255,255,0.4); }
 .copy-btn:hover { opacity: 0.88; }
 .copied-note { color: var(--q-positive); font-size: 0.85rem; }
 .refresh-note { font-size: 0.75rem; color: rgba(0,0,0,0.35); }
+
+.timer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+}
+.timer-chip.timer-positive { background: rgba(33,186,69,0.15); color: #1a8f3a; }
+.timer-chip.timer-warning  { background: rgba(240,173,0,0.18);  color: #9a6800; }
+.timer-chip.timer-negative { background: rgba(193,0,21,0.13);   color: #b00015; }
+body.body--dark .timer-chip.timer-positive { background: rgba(33,186,69,0.22);  color: #4ddb72; }
+body.body--dark .timer-chip.timer-warning  { background: rgba(240,173,0,0.22);  color: #ffd04d; }
+body.body--dark .timer-chip.timer-negative { background: rgba(193,0,21,0.22);   color: #ff5566; }
 </style>
