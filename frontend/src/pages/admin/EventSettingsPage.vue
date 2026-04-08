@@ -221,9 +221,7 @@ const eventsStore = useEventsStore()
 const $q = useQuasar()
 const { t } = useI18n()
 
-const applyLang = (lang) => {
-  form.value.language = lang
-}
+
 const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
@@ -311,8 +309,6 @@ onMounted(async () => {
       returnLng: res.data.returnLng ?? null,
       returnSameAsStart: res.data.returnSameAsStart ?? true,
     }
-    appLang.value = lang
-    applyLang(lang)
 
     await nextTick()
     initPointsMap()
