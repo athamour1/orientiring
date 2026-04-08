@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oriento — Open-Source Scavenger Hunt Platform</title>
+  <meta name="description" content="Oriento is an open-source orienteering and scavenger hunt platform. Create events, track teams in real-time, scan QR checkpoints and compete on live leaderboards." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #8e5add;
+      --primary-dark: #6c3fc4;
+      --accent: #c4a0f5;
+      --bg: #0d0718;
+      --card: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.1);
+      --text: #f0ebff;
+      --muted: rgba(240,235,255,0.6);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(13,7,24,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-lg { padding: 14px 32px; font-size: 1rem; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(142,90,221,0.25) 0%, transparent 70%),
+        var(--bg);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(142,90,221,0.15);
+      border: 1px solid rgba(142,90,221,0.4);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-meta {
+      margin-top: 60px;
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-meta-item {
+      text-align: center;
+    }
+    .hero-meta-item .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+    .hero-meta-item .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ── SECTION ── */
+    section { padding: 100px 24px; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .feature-card:hover {
+      border-color: rgba(142,90,221,0.45);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-bg {
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(142,90,221,0.06) 50%, var(--bg) 100%);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+      margin-top: 56px;
+      counter-reset: steps;
+    }
+
+    .step {
+      position: relative;
+      text-align: center;
+    }
+
+    .step-num {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 0 8px rgba(142,90,221,0.12);
+    }
+
+    .step-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── TECH STACK ── */
+    .stack-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .stack-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.2s;
+    }
+    .stack-pill:hover { border-color: rgba(142,90,221,0.5); }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+    }
+
+    .cta-card {
+      background: linear-gradient(135deg, rgba(142,90,221,0.18) 0%, rgba(108,63,196,0.1) 100%);
+      border: 1px solid rgba(142,90,221,0.3);
+      border-radius: 28px;
+      padding: 72px 40px;
+    }
+
+    .cta-card h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+
+    .cta-card p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 500px;
+      margin: 0 auto 36px;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 14px 20px; }
+      .nav-links { gap: 14px; }
+      .nav-links a { display: none; }
+      section { padding: 72px 20px; }
+      .cta-card { padding: 48px 24px; }
+      .hero-meta { gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">🧭 <span>Oriento</span></a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#stack">Stack</a>
+    <a href="https://github.com/mourtzoukos-thanos/orientiring" target="_blank" rel="noopener" class="btn btn-outline">⭐ GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">🚀 Open Source &amp; Free</div>
+  <h1>Run your <span class="highlight">scavenger hunt</span><br/>like a pro</h1>
+  <p>Oriento is a full-stack platform for organizing orienteering events and scavenger hunts. Real-time maps, QR checkpoints, live leaderboards — all in a sleek PWA your teams install in seconds.</p>
+  <div class="hero-actions">
+    <a href="https://github.com/mourtzoukos-thanos/orientiring" target="_blank" rel="noopener" class="btn btn-primary btn-lg">View on GitHub</a>
+    <a href="https://github.com/mourtzoukos-thanos/orientiring#getting-started" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Quick Start</a>
+  </div>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="value">PWA</div>
+      <div class="label">Installable on iOS &amp; Android</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="value">Real-time</div>
+      <div class="label">WebSocket live updates</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="value">i18n</div>
+      <div class="label">English &amp; Greek built-in</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="value">Docker</div>
+      <div class="label">One-command deploy</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to run<br/>a competitive hunt</h2>
+    <p class="section-sub">From event setup to finish-line celebration — Oriento handles the full lifecycle of your scavenger hunt.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🗺️</span>
+        <div class="feature-title">Interactive Team Maps</div>
+        <div class="feature-desc">Teams navigate in real-time with a Leaflet-powered map showing checkpoints, GPS position and the return point. Multiple tile layers including satellite view.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📸</span>
+        <div class="feature-title">QR Checkpoint Scanning</div>
+        <div class="feature-desc">Continuous camera scanning validates QR codes at each checkpoint. Admins can download and print all QRs at once from the dashboard.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏆</span>
+        <div class="feature-title">Live Leaderboards</div>
+        <div class="feature-desc">Scores update the moment a team scans a checkpoint via WebSockets. Share a public link with spectators — no login required.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📍</span>
+        <div class="feature-title">Real-time GPS Tracking</div>
+        <div class="feature-desc">Admin map shows all team positions live. Route history per team, filterable activity feed, and GPS breadcrumb trails on the map.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⏱️</span>
+        <div class="feature-title">Event Timer</div>
+        <div class="feature-desc">Set start and end times. Events auto-activate at the start time, scans are rejected after the end time, and a live countdown is shown to all teams.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🥇</span>
+        <div class="feature-title">Bonus Point System</div>
+        <div class="feature-desc">Award extra points to the first team to scan each checkpoint and to the first team to complete the entire hunt. Fully configurable per event.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📱</span>
+        <div class="feature-title">Progressive Web App</div>
+        <div class="feature-desc">Teams install Oriento directly to their home screen on iOS and Android. Works seamlessly in any mobile browser — no app store needed.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🌗</span>
+        <div class="feature-title">Dark Mode &amp; i18n</div>
+        <div class="feature-desc">Full dark mode support throughout the app. Built-in English and Greek localization with per-event language preference for teams.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👑</span>
+        <div class="feature-title">Admin Dashboard</div>
+        <div class="feature-desc">Create events, manage teams, drag checkpoint markers on a map, view live activity feeds and checkpoint progression — all from one place.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="how-bg">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Up and running in minutes</h2>
+    <p class="section-sub">Oriento is designed to get out of the way so you can focus on running a great event.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Create your event</div>
+        <div class="step-desc">Set the name, timer, bonus rules and start/return points from the admin dashboard.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Place checkpoints</div>
+        <div class="step-desc">Drop pins on the map, set point values and first-scan bonuses. Download all QR codes as a batch.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Register teams</div>
+        <div class="step-desc">Create team accounts with usernames and passwords. Teams log into the PWA on their phones.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Go live</div>
+        <div class="step-desc">Activate the event. Teams navigate the map, scan QR codes at checkpoints and compete in real-time.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-title">Follow along</div>
+        <div class="step-desc">Watch the live activity feed, GPS positions and leaderboard update in real-time from the admin dashboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="container">
+    <div class="section-label">Tech Stack</div>
+    <h2 class="section-title">Built on modern,<br/>battle-tested tools</h2>
+    <p class="section-sub">Every piece chosen for reliability, developer experience and performance.</p>
+
+    <div class="stack-grid">
+      <div class="stack-pill">⚡ Vue 3</div>
+      <div class="stack-pill">🎨 Quasar Framework</div>
+      <div class="stack-pill">🔷 TypeScript</div>
+      <div class="stack-pill">🪺 NestJS</div>
+      <div class="stack-pill">🐘 PostgreSQL</div>
+      <div class="stack-pill">🔺 Prisma ORM</div>
+      <div class="stack-pill">🗺️ Leaflet</div>
+      <div class="stack-pill">🔌 Socket.IO</div>
+      <div class="stack-pill">🐳 Docker</div>
+      <div class="stack-pill">📦 Vite</div>
+      <div class="stack-pill">🔐 JWT Auth</div>
+      <div class="stack-pill">📱 PWA</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <h2>Ready to run your hunt?</h2>
+      <p>Oriento is completely open-source and free. Clone it, deploy it with Docker and run your first event today.</p>
+      <div class="cta-actions">
+        <a href="https://github.com/mourtzoukos-thanos/orientiring" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Get started on GitHub</a>
+        <a href="https://github.com/mourtzoukos-thanos/orientiring/blob/master/README.md" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Built with ❤️ by <a href="https://github.com/mourtzoukos-thanos" target="_blank" rel="noopener">Thanos Mourtzoukos</a> &nbsp;·&nbsp; <a href="https://github.com/mourtzoukos-thanos/orientiring/blob/master/LICENSE" target="_blank" rel="noopener">MIT License</a> &nbsp;·&nbsp; <a href="https://github.com/mourtzoukos-thanos/orientiring" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>
