@@ -224,27 +224,36 @@ onMounted(async () => {
     gpsPermissionDenied.value = false
   }
 
-  // Track compass heading for direction arrow
+  // Track compass heading for direction arrow.
+  // iOS: webkitCompassHeading is always absolute true-north (0=N, 90=E).
+  // Android: 'deviceorientationabsolute' gives magnetic-north absolute readings.
+  //   alpha increases counter-clockwise, so bearing = (360 - alpha) % 360.
+  // Fallback 'deviceorientation' on Android has alpha relative to device start → unreliable.
   const handleOrientation = (e) => {
-    // webkitCompassHeading is true north on iOS; alpha is relative on Android
     if (e.webkitCompassHeading != null) {
+      // iOS — already a clockwise bearing from true north
       heading.value = e.webkitCompassHeading
-    } else if (e.absolute && e.alpha != null) {
-      heading.value = 360 - e.alpha
     } else if (e.alpha != null) {
-      heading.value = 360 - e.alpha
+      // Android absolute: alpha is CCW from magnetic north → convert to CW bearing
+      heading.value = (360 - e.alpha) % 360
     }
     updateUserMarkerIcon()
   }
 
   if (window.DeviceOrientationEvent) {
-    // iOS 13+ requires permission
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+ — requires explicit permission
       DeviceOrientationEvent.requestPermission().then(state => {
         if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation)
       }).catch(() => {})
     } else {
-      window.addEventListener('deviceorientation', handleOrientation)
+      // Android: prefer 'deviceorientationabsolute' (magnetic north reference).
+      // Falls back to 'deviceorientation' if not supported.
+      window.addEventListener('deviceorientationabsolute', handleOrientation)
+      window.addEventListener('deviceorientation', (e) => {
+        // Only use relative event if we haven't already received an absolute one
+        if (heading.value === null) handleOrientation(e)
+      })
     }
   }
 })
@@ -253,30 +262,34 @@ function makeUserIcon(deg) {
   const showArrow = activeEvent.value?.showDirectionArrow
   const rotate = deg ?? 0
   const hasHeading = deg != null
-  // Arrow is solid when we have a real heading, dashed/dimmer when just a placeholder
-  const arrowStroke = hasHeading ? '#c4a0f5' : 'rgba(196,160,245,0.45)'
-  const arrowDash = hasHeading ? 'none' : '2,2'
-  const size = showArrow ? 36 : 24
-  const half = size / 2
+  const arrowOpacity = hasHeading ? '1' : '0.4'
+  // Arrow SVG is 24×24, dot is 16×16. Total canvas when arrow shown: 56×56
+  // Dot sits at center (28,28). Arrow tip points up at 0°, rotated around dot center.
+  const canvasSize = showArrow ? 56 : 22
+  const dotSize = 16
+  const half = canvasSize / 2
 
   return L.divIcon({
     className: '',
-    iconSize: [size, size],
+    iconSize: [canvasSize, canvasSize],
     iconAnchor: [half, half],
     html: `
-      <div style="position:relative;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;">
-        <div style="width:16px;height:16px;border-radius:50%;background:#8e5add;border:2.5px solid #6c3fc4;box-shadow:0 0 0 2px rgba(142,90,221,0.35);flex-shrink:0;"></div>
+      <div style="position:relative;width:${canvasSize}px;height:${canvasSize}px;">
         ${showArrow ? `
-        <svg style="position:absolute;top:0;left:0;overflow:visible;" width="${size}" height="${size}" viewBox="-${half} -${half} ${size} ${size}">
-          <g transform="rotate(${rotate})">
-            <polygon points="0,-15 5,0 0,-4 -5,0"
-              fill="none"
-              stroke="${arrowStroke}"
-              stroke-width="1.8"
-              stroke-linejoin="round"
-              stroke-dasharray="${arrowDash}"/>
+        <svg style="position:absolute;top:0;left:0;" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}" overflow="visible">
+          <g transform="rotate(${rotate}, ${half}, ${half})">
+            <g transform="translate(${half - 12}, ${half - 28})">
+              <path d="M4.47046 17.0591L10.2111 5.57771C10.9482 4.10361 13.0518 4.10362 13.7889 5.57771L19.5295 17.0591C20.3661 18.7322 18.6528 20.5356 16.9391 19.7858L12.4008 17.8004C12.1453 17.6886 11.8547 17.6886 11.5992 17.8004L7.06094 19.7858C5.34719 20.5356 3.6339 18.7322 4.47046 17.0591Z"
+                stroke="#c4a0f5"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"
+                opacity="${arrowOpacity}"/>
+            </g>
           </g>
         </svg>` : ''}
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${dotSize}px;height:${dotSize}px;border-radius:50%;background:#8e5add;border:2.5px solid #6c3fc4;box-shadow:0 0 0 2px rgba(142,90,221,0.35);"></div>
       </div>`,
   })
 }
