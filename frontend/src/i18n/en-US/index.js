@@ -163,6 +163,8 @@ export default {
   startTime: 'Start Time',
   endTime: 'End Time',
   showTeamLocation: 'Allow teams to share their GPS location',
+  showDirectionArrow: 'Show direction arrow on team marker',
+  showDirectionArrowDesc: 'Shows a subtle compass arrow so teams can see which way they\'re facing',
   filterByTeam: 'Filter by team',
   showAllTeams: 'Show all teams',
   bonusForFirst: 'First-scan bonus points',

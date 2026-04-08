@@ -34,7 +34,8 @@ model Event {
   startTime   DateTime?
   endTime     DateTime?
   isActive          Boolean      @default(false)
-  showTeamLocation  Boolean      @default(true)
+  showTeamLocation      Boolean      @default(true)
+  showDirectionArrow    Boolean      @default(false)
   language          String       @default("en-US")
   firstFinishBonus  Int          @default(0)
   firstFinishBonusAwardedToId Int?

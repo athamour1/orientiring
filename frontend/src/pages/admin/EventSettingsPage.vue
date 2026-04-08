@@ -29,6 +29,16 @@
           size="lg"
         />
 
+        <q-toggle
+          v-model="form.showDirectionArrow"
+          checked-icon="navigation"
+          unchecked-icon="radio_button_unchecked"
+          :label="$t('showDirectionArrow')"
+          color="primary"
+          size="lg"
+        />
+        <div class="text-caption text-grey-7 q-mt-none q-ml-sm">{{ $t('showDirectionArrowDesc') }}</div>
+
         <q-separator class="q-my-sm" />
 
         <!-- First finisher bonus -->
@@ -226,7 +236,7 @@ const route = useRoute()
 const router = useRouter()
 const eventId = route.params.eventId
 
-const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null, language: 'en-US', firstFinishBonus: 0, startLat: null, startLng: null, returnLat: null, returnLng: null, returnSameAsStart: true })
+const form = ref({ name: '', description: '', isActive: false, showTeamLocation: true, showDirectionArrow: false, startTime: null, endTime: null, language: 'en-US', firstFinishBonus: 0, startLat: null, startLng: null, returnLat: null, returnLng: null, returnSameAsStart: true })
 const pointMode = ref('start')
 let pointsMap = null
 let startMarker = null
@@ -299,6 +309,7 @@ onMounted(async () => {
       description: res.data.description,
       isActive: res.data.isActive,
       showTeamLocation: res.data.showTeamLocation ?? true,
+      showDirectionArrow: res.data.showDirectionArrow ?? false,
       startTime: toLocalInput(res.data.startTime),
       endTime: toLocalInput(res.data.endTime),
       language: lang,

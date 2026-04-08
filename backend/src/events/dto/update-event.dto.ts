@@ -28,6 +28,10 @@ export class UpdateEventDto {
   showTeamLocation?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  showDirectionArrow?: boolean;
+
+  @IsOptional()
   @IsString()
   @IsIn(['en-US', 'el'])
   language?: string;

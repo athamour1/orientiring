@@ -97,6 +97,7 @@ const { t, locale } = useI18n()
 const markers = ref([])
 const activeEvent = ref(null)
 const userMarker = ref(null)
+const heading = ref(null) // device compass heading in degrees
 const allDone = ref(false)
 const timeExpired = ref(false)
 const bannerDismissed = ref(false)
@@ -222,7 +223,55 @@ onMounted(async () => {
     gpsBlocked.value = true
     gpsPermissionDenied.value = false
   }
+
+  // Track compass heading for direction arrow
+  const handleOrientation = (e) => {
+    // webkitCompassHeading is true north on iOS; alpha is relative on Android
+    if (e.webkitCompassHeading != null) {
+      heading.value = e.webkitCompassHeading
+    } else if (e.absolute && e.alpha != null) {
+      heading.value = 360 - e.alpha
+    } else if (e.alpha != null) {
+      heading.value = 360 - e.alpha
+    }
+    updateUserMarkerIcon()
+  }
+
+  if (window.DeviceOrientationEvent) {
+    // iOS 13+ requires permission
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(state => {
+        if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation)
+      }).catch(() => {})
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation)
+    }
+  }
 })
+
+function makeUserIcon(deg) {
+  const rotate = deg != null ? deg : 0
+  // Outer circle dot + optional outlined arrow on top
+  return L.divIcon({
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    html: `
+      <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+        <div style="width:18px;height:18px;border-radius:50%;background:#8e5add;border:3px solid #6c3fc4;box-shadow:0 0 0 2px rgba(142,90,221,0.3);"></div>
+        ${activeEvent.value?.showDirectionArrow && deg != null ? `
+        <svg style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(${rotate}deg);overflow:visible;" width="28" height="28" viewBox="-14 -14 28 28">
+          <polygon points="0,-13 5,2 0,-2 -5,2" fill="none" stroke="#c4a0f5" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>` : ''}
+      </div>`,
+  })
+}
+
+function updateUserMarkerIcon() {
+  if (userMarker.value && activeEvent.value?.showDirectionArrow) {
+    userMarker.value.setIcon(makeUserIcon(heading.value))
+  }
+}
 
 async function onPosition(pos) {
   const { latitude, longitude } = pos.coords
@@ -235,14 +284,14 @@ async function onPosition(pos) {
   // Only show team's own dot on their map if admin hasn't hidden locations
   if (activeEvent.value?.showTeamLocation !== false) {
     if (!userMarker.value) {
-      userMarker.value = L.circleMarker([latitude, longitude], {
-        color: '#6c3fc4', fillColor: '#8e5add', fillOpacity: 0.9, radius: 10, weight: 3
-      }).bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
+      userMarker.value = L.marker([latitude, longitude], { icon: makeUserIcon(heading.value) })
+        .bindPopup('<b>📍 ' + t('yourTeam') + '</b>').addTo(map.value)
       if (markers.value.length === 0) {
         map.value.setView([latitude, longitude], 16)
       }
     } else {
       userMarker.value.setLatLng([latitude, longitude])
+      userMarker.value.setIcon(makeUserIcon(heading.value))
       userMarker.value.bringToFront()
     }
   }
