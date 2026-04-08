@@ -75,15 +75,18 @@ api.interceptors.response.use(
 const scheduleProactiveRefresh = () => {
   setInterval(async () => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) return // token was removed (logout in another tab) — skip silently
     try {
       const { data } = await axios.post(
         `${API_BASE}/auth/refresh`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      localStorage.setItem('token', data.access_token)
-      api.defaults.headers.common.Authorization = `Bearer ${data.access_token}`
+      // Only save if the token in storage is still the same one we refreshed
+      if (localStorage.getItem('token') === token) {
+        localStorage.setItem('token', data.access_token)
+        api.defaults.headers.common.Authorization = `Bearer ${data.access_token}`
+      }
     } catch {
       // Will be handled by the response interceptor on next real request
     }
@@ -95,6 +98,13 @@ const scheduleProactiveRefresh = () => {
 // We use BroadcastChannel: new tabs ask existing tabs if a session is alive,
 // and any existing tab responds immediately so the new tab can set the flag
 // before the session-only check runs.
+// ── Auth ready promise ────────────────────────────────────────────────────────
+// The boot function is async (cross-tab session query). The router guard must
+// wait for it to finish before evaluating auth state, otherwise it reads a
+// token that may be about to be cleared.
+let _resolveAuthReady
+export const authReady = new Promise((resolve) => { _resolveAuthReady = resolve })
+
 const SESSION_CHANNEL = 'oriento_session'
 let sessionChannel = null
 
@@ -147,6 +157,7 @@ export default defineBoot(async ({ app }) => {
     }
   }
 
+  _resolveAuthReady()
   app.config.globalProperties.$axios = axios
   app.config.globalProperties.$api = api
   scheduleProactiveRefresh()

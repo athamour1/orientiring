@@ -65,6 +65,8 @@ const toggleDark = () => {
 
 const logout = () => {
   localStorage.removeItem('token')
+  localStorage.removeItem('sessionOnly')
+  sessionStorage.removeItem('sessionActive')
   delete api.defaults.headers.common['Authorization']
   router.push('/')
 }

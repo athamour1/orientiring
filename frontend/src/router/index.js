@@ -5,6 +5,7 @@ import {
   createWebHistory,
   createWebHashHistory,
 } from 'vue-router'
+import { authReady } from 'boot/axios'
 import routes from './routes'
 
 const decodeToken = (token) => {
@@ -49,7 +50,8 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
-  Router.beforeEach((to) => {
+  Router.beforeEach(async (to) => {
+    await authReady
     const role = getAuthRole()
 
     // Already logged in → redirect away from login page
