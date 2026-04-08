@@ -60,7 +60,8 @@ npm version "$VERSION" --no-git-tag-version --allow-same-version
 cd ..
 git add frontend/package.json
 git commit -m "chore(release): bump version to ${VERSION}"
-ok "Version bumped and committed"
+git push
+ok "Version bumped, committed and pushed"
 
 # ─── Confirmation ───────────────────────────────────────────────────────────────
 echo ""
