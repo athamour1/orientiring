@@ -67,11 +67,69 @@ This provisions PostgreSQL, applies Prisma migrations, seeds initial data and bo
 
 ## 🚢 Production Deployment
 
-Oriento is designed for Docker-based production deployments.
+Oriento ships with a production-ready Docker Compose file using pre-built images from GHCR.
 
-1. Copy and configure `docker-compose.prod.yml` with your `JWT_SECRET` and `CORS_ORIGIN`.
-2. Build production images and push to your registry (e.g. GHCR).
-3. Deploy behind an Nginx reverse proxy on your VPS.
+**`docker-compose.prod.yml`**
+```yaml
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: orienteering_db_prod
+    restart: always
+    env_file:
+      - ./db.env.prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+  backend:
+    image: ghcr.io/athamour1/orientiring/backend:latest
+    container_name: orienteering_backend_prod
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env.prod
+
+  frontend:
+    image: ghcr.io/athamour1/orientiring/frontend:latest
+    container_name: orienteering_frontend_prod
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=https://your-domain.com
+
+volumes:
+  postgres_data_prod:
+```
+
+**`db.env.prod`**
+```env
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=CHANGE_ME_DB_PASS
+POSTGRES_DB=orienteering
+```
+
+**`backend/.env.prod`**
+```env
+DATABASE_URL=postgresql://admin:CHANGE_ME_DB_PASS@db:5432/orienteering?schema=public
+JWT_SECRET=CHANGE_ME_JWT_SECRET_MIN_32_CHARS
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=CHANGE_ME_ADMIN_PASS
+CORS_ORIGIN=https://your-domain.com
+FRONTEND_URL=https://your-domain.com
+PORT=3000
+```
+
+Then deploy:
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+> Place Nginx in front to handle HTTPS and proxy both port `80` (frontend) and `3000` (API).
 
 ---
 
