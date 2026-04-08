@@ -250,18 +250,32 @@ onMounted(async () => {
 })
 
 function makeUserIcon(deg) {
-  const rotate = deg != null ? deg : 0
-  // Outer circle dot + optional outlined arrow on top
+  const showArrow = activeEvent.value?.showDirectionArrow
+  const rotate = deg ?? 0
+  const hasHeading = deg != null
+  // Arrow is solid when we have a real heading, dashed/dimmer when just a placeholder
+  const arrowStroke = hasHeading ? '#c4a0f5' : 'rgba(196,160,245,0.45)'
+  const arrowDash = hasHeading ? 'none' : '2,2'
+  const size = showArrow ? 36 : 24
+  const half = size / 2
+
   return L.divIcon({
     className: '',
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    iconSize: [size, size],
+    iconAnchor: [half, half],
     html: `
-      <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
-        <div style="width:18px;height:18px;border-radius:50%;background:#8e5add;border:3px solid #6c3fc4;box-shadow:0 0 0 2px rgba(142,90,221,0.3);"></div>
-        ${activeEvent.value?.showDirectionArrow && deg != null ? `
-        <svg style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(${rotate}deg);overflow:visible;" width="28" height="28" viewBox="-14 -14 28 28">
-          <polygon points="0,-13 5,2 0,-2 -5,2" fill="none" stroke="#c4a0f5" stroke-width="1.5" stroke-linejoin="round"/>
+      <div style="position:relative;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;">
+        <div style="width:16px;height:16px;border-radius:50%;background:#8e5add;border:2.5px solid #6c3fc4;box-shadow:0 0 0 2px rgba(142,90,221,0.35);flex-shrink:0;"></div>
+        ${showArrow ? `
+        <svg style="position:absolute;top:0;left:0;overflow:visible;" width="${size}" height="${size}" viewBox="-${half} -${half} ${size} ${size}">
+          <g transform="rotate(${rotate})">
+            <polygon points="0,-15 5,0 0,-4 -5,0"
+              fill="none"
+              stroke="${arrowStroke}"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+              stroke-dasharray="${arrowDash}"/>
+          </g>
         </svg>` : ''}
       </div>`,
   })
