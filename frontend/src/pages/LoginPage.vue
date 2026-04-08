@@ -138,16 +138,17 @@ body.body--light .login-page {
   width: 100%;
   max-width: 400px;
   border-radius: 20px;
+  box-shadow: none !important;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
 body.body--light .main-card {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(142, 90, 221, 0.15);
 }
 body.body--dark .main-card {
-  background: var(--q-dark);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 16, 48, 0.55);
+  border: 1px solid rgba(196, 160, 245, 0.1);
 }
 
 .branded-title {
@@ -161,7 +162,7 @@ body.body--dark .main-card {
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.85rem;
+  font-size: 1rem;
   opacity: 0.5;
   color: #fff;
   letter-spacing: 0.05em;
