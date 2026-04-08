@@ -84,7 +84,11 @@ const keepLoggedIn = ref(false)
 
 const onSubmit = async () => {
   try {
-    const res = await api.post('/auth/login', { username: username.value, password: password.value })
+    const res = await api.post('/auth/login', {
+      username: username.value,
+      password: password.value,
+      keepLoggedIn: keepLoggedIn.value
+    })
     localStorage.setItem('token', res.data.access_token)
     if (!keepLoggedIn.value) {
       localStorage.setItem('sessionOnly', 'true')

@@ -59,7 +59,7 @@ api.interceptors.response.use(
         // Refresh also failed → force re-login
         localStorage.removeItem('token')
         delete api.defaults.headers.common.Authorization
-        window.location.hash = '#/'
+        window.location.href = '/'
         return Promise.reject(refreshErr)
       } finally {
         isRefreshing = false

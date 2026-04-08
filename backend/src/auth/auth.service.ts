@@ -19,10 +19,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any, keepLoggedIn = false) {
     const payload = { username: user.username, sub: user.id, role: user.role };
+    const expiresIn = keepLoggedIn ? '30d' : '8h';
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn }),
       role: user.role
     };
   }
