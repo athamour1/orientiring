@@ -14,7 +14,8 @@ const routes = [
       { path: 'events/:eventId', component: () => import('pages/admin/EventDetailsPage.vue') },
       { path: 'events/:eventId/teams', component: () => import('pages/admin/TeamsAdminPage.vue') },
       { path: 'events/:eventId/logs', component: () => import('pages/admin/EventLogsPage.vue') },
-      { path: 'events/:eventId/settings', component: () => import('pages/admin/EventSettingsPage.vue') }
+      { path: 'events/:eventId/settings', component: () => import('pages/admin/EventSettingsPage.vue') },
+      { path: 'profile', component: () => import('pages/admin/AdminProfilePage.vue') }
     ]
   },
   {
