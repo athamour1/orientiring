@@ -2,6 +2,8 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers'
+import { readFileSync } from 'fs'
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -46,7 +48,7 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: { APP_VERSION: version },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

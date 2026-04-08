@@ -64,6 +64,7 @@
         </div>
       </q-form>
     </div>
+    <div class="app-version">v{{ appVersion }}</div>
   </q-page>
 </template>
 
@@ -76,6 +77,7 @@ import { useI18n } from 'vue-i18n'
 
 const $q = useQuasar()
 const { t } = useI18n()
+const appVersion = process.env.APP_VERSION
 const router = useRouter()
 const username = ref('')
 const password = ref('')
@@ -153,4 +155,16 @@ body.body--dark .main-card {
 }
 
 .opacity-80 { opacity: 0.8; }
+
+.app-version {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  opacity: 0.35;
+  color: #fff;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
 </style>
