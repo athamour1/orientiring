@@ -79,6 +79,37 @@ export class EventsService {
     return { checkpoints, teamCount };
   }
 
+  async getDashboardStats() {
+    const [teamCounts, checkpointCounts, scanCounts] = await Promise.all([
+      this.prisma.user.groupBy({ by: ['eventId'], _count: { _all: true } }),
+      this.prisma.checkpoint.groupBy({ by: ['eventId'], _count: { _all: true } }),
+      this.prisma.scan.groupBy({ by: ['checkpointId'], _count: { _all: true } }),
+    ]);
+
+    // Map scanCounts to eventId via checkpoint lookup
+    const checkpointEventMap = await this.prisma.checkpoint.findMany({
+      select: { id: true, eventId: true },
+    });
+    const cpEventId = new Map(checkpointEventMap.map(c => [c.id, c.eventId]));
+    const scansByEvent = new Map<number, number>();
+    for (const s of scanCounts) {
+      const evId = cpEventId.get(s.checkpointId);
+      if (evId) scansByEvent.set(evId, (scansByEvent.get(evId) ?? 0) + s._count._all);
+    }
+
+    const result: Record<number, { teamCount: number; checkpointCount: number; scanCount: number }> = {};
+    for (const row of teamCounts) result[row.eventId] = { teamCount: row._count._all, checkpointCount: 0, scanCount: 0 };
+    for (const row of checkpointCounts) {
+      if (!result[row.eventId]) result[row.eventId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
+      result[row.eventId].checkpointCount = row._count._all;
+    }
+    for (const [evId, count] of scansByEvent) {
+      if (!result[evId]) result[evId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
+      result[evId].scanCount = count;
+    }
+    return result;
+  }
+
   async getTeamLocations(eventId: number) {
     return this.prisma.teamLocation.findMany({
       where: { team: { eventId } },

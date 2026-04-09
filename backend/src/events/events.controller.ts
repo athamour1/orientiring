@@ -37,6 +37,12 @@ export class EventsController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('dashboard-stats')
+  getDashboardStats() {
+    return this.eventsService.getDashboardStats();
+  }
+
+  @Roles(Role.ADMIN)
   @Get(':id/stats')
   getStats(@Param('id') id: string) {
     return this.eventsService.getStats(+id);

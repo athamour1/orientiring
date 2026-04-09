@@ -442,24 +442,16 @@ function formatDateShort(val) {
   return new Date(val).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-async function fetchStats(evId) {
+async function fetchAllStats() {
   try {
-    const res = await api.get(`/admin/events/${evId}/stats`)
-    eventStats[evId] = {
-      teamCount: res.data.teamCount ?? 0,
-      checkpointCount: res.data.checkpoints?.length ?? 0,
-      scanCount: res.data.checkpoints?.reduce((s, cp) => s + (cp._count?.scans ?? 0), 0) ?? 0,
-    }
+    const res = await api.get('/admin/events/dashboard-stats')
+    Object.assign(eventStats, res.data)
   } catch { /* ignore */ }
 }
 
 onMounted(async () => {
   if (!store.loaded) await store.fetchEvents()
-  // Stagger stats requests to avoid rate limit
-  for (let i = 0; i < events.value.length; i++) {
-    if (i > 0) await new Promise(r => setTimeout(r, 200))
-    fetchStats(events.value[i].id)
-  }
+  fetchAllStats()
 })
 
 const copyLeaderboardLink = (eventId) => {
