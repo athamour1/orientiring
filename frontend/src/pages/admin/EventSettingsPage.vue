@@ -189,6 +189,24 @@
           <q-btn round elevated color="white" text-color="dark" icon="add" size="sm" @click="pointsMap && pointsMap.zoomIn()" />
           <q-btn round elevated color="white" text-color="dark" icon="remove" size="sm" @click="pointsMap && pointsMap.zoomOut()" />
         </div>
+        <div class="points-layer-btn">
+          <q-btn round elevated icon="layers" color="white" text-color="grey-8" size="sm">
+            <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
+              <q-list dense style="min-width:160px; padding: 6px;">
+                <q-item
+                  v-for="layer in pointsBaseLayers"
+                  :key="layer.name"
+                  clickable
+                  @click="switchPointsBase(layer)"
+                  v-close-popup
+                  :class="['layer-item', { 'layer-item--active': pointsBaseName === layer.name }]"
+                >
+                  <q-item-section>{{ layer.label }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
       </div>
 
       <div class="row q-mt-sm q-gutter-md text-caption">
@@ -241,6 +259,18 @@ const pointMode = ref('start')
 let pointsMap = null
 let startMarker = null
 let returnMarker = null
+let pointsCurrentBaseTile = null
+const pointsBaseLayers = ref([])
+const pointsBaseName = ref('topo')
+
+function switchPointsBase(layer) {
+  if (!pointsMap || !layer) return
+  if (pointsCurrentBaseTile) pointsMap.removeLayer(pointsCurrentBaseTile)
+  layer.tile.addTo(pointsMap)
+  pointsCurrentBaseTile = layer.tile
+  pointsBaseName.value = layer.name
+  localStorage.setItem('adminMapLayer', layer.name)
+}
 
 const startIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#43a047;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })
 const returnIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#e53935;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })
@@ -274,7 +304,18 @@ function onReturnSameToggle(val) {
 
 function initPointsMap() {
   pointsMap = L.map('points-map', { zoomControl: false }).setView([38.0, 23.7], 11)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(pointsMap)
+
+  pointsBaseLayers.value = [
+    { name: 'street',    label: '🗺️ Street',      tile: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }) },
+    { name: 'topo',      label: '⛰️ Topographic', tile: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenTopoMap' }) },
+    { name: 'satellite', label: '🛰️ Satellite',   tile: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: '© Esri' }) },
+    { name: 'dark',      label: '🌙 Dark',         tile: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© CartoDB' }) },
+  ]
+  const initName = localStorage.getItem('adminMapLayer') || 'topo'
+  pointsBaseName.value = initName
+  pointsCurrentBaseTile = pointsBaseLayers.value.find(l => l.name === initName).tile
+  pointsCurrentBaseTile.addTo(pointsMap)
+
   pointsMap.on('click', (e) => placeMarker(e.latlng, form.value.returnSameAsStart ? 'start' : pointMode.value))
   setTimeout(() => pointsMap.invalidateSize(), 150)
 }
@@ -380,5 +421,11 @@ const confirmDelete = () => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.points-layer-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
 }
 </style>
