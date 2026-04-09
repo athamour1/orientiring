@@ -330,7 +330,7 @@ function formatDateTime(val) {
 onMounted(() => { if (!store.loaded) store.fetchEvents() })
 
 const copyLeaderboardLink = (eventId) => {
-  const url = `${window.location.protocol}//${window.location.host}/#/leaderboard/${eventId}`
+  const url = `${window.location.protocol}//${window.location.host}/leaderboard/${eventId}`
   navigator.clipboard.writeText(url)
 }
 
