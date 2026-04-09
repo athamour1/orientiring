@@ -443,6 +443,10 @@ function formatDateShort(val) {
 }
 
 async function fetchAllStats() {
+  // Pre-fill zeros for every event so the skeleton never shows for empty ones
+  events.value.forEach(ev => {
+    if (!eventStats[ev.id]) eventStats[ev.id] = { teamCount: 0, checkpointCount: 0, scanCount: 0 }
+  })
   try {
     const res = await api.get('/admin/events/dashboard-stats')
     Object.assign(eventStats, res.data)
