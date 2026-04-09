@@ -74,20 +74,15 @@
         <q-card-section class="q-pt-none">
           <q-form @submit="createCheckpoint" class="q-gutter-md">
             <q-input v-model="form.name" :label="$t('locationName')" outlined :rules="[val => !!val || 'Required']" />
-            <div class="row q-col-gutter-sm">
-              <div class="col-12 col-sm-6">
-                <q-input v-model.number="form.latitude" :label="$t('latitude')" type="number" step="any" outlined :rules="[val => !!val || 'Required']" />
-              </div>
-              <div class="col-12 col-sm-6">
-                <q-input v-model.number="form.longitude" :label="$t('longitude')" type="number" step="any" outlined :rules="[val => !!val || 'Required']" />
-              </div>
+            <div class="row q-gutter-sm">
+              <q-input class="col" v-model.number="form.latitude" :label="$t('latitude')" type="number" step="any" outlined :rules="[val => !!val || 'Required']" />
+              <q-input class="col" v-model.number="form.longitude" :label="$t('longitude')" type="number" step="any" outlined :rules="[val => !!val || 'Required']" />
             </div>
             <q-input v-model.number="form.pointValue" :label="$t('pointValueReward')" type="number" outlined :rules="[val => !!val || 'Required']" />
             <div>
               <q-toggle v-model="formBonusEnabled" :label="$t('bonusForFirst')" color="primary" @update:model-value="val => { if (!val) form.bonusForFirst = 0 }" />
               <q-input v-if="formBonusEnabled" v-model.number="form.bonusForFirst" :label="$t('bonusForFirst')" type="number" min="0" outlined :hint="$t('bonusForFirstHint')" class="q-mt-sm" />
             </div>
-            <q-btn flat color="secondary" icon="my_location" :label="$t('useGps')" @click="getCurrentLocation" class="full-width" no-caps />
             <div class="row justify-end q-mt-lg q-gutter-sm">
               <q-btn flat :label="$t('cancel')" color="grey-7" v-close-popup no-caps />
               <q-btn unelevated :label="$t('deploy')" color="primary" type="submit" no-caps />
