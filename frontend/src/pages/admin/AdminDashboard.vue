@@ -35,7 +35,7 @@
     </q-card>
 
     <!-- New Event Modal -->
-    <q-dialog v-model="showNewEventDialog">
+    <q-dialog v-model="showNewEventDialog" @show="initNewEventMap" @hide="destroyNewEventMap">
       <q-card style="min-width: 420px; width: 95vw; max-width: 560px; border-radius: 20px; max-height: 90vh; display: flex; flex-direction: column;" class="q-pa-sm">
         <q-card-section class="q-pb-sm" style="flex-shrink: 0;">
           <div class="text-h6 text-weight-bold tracking-tight">{{ $t('createEventTitle') }}</div>
@@ -61,6 +61,8 @@
 
             <q-toggle v-model="newEvent.isActive" :label="$t('activateImmediately')" checked-icon="check" unchecked-icon="clear" color="positive" size="lg" />
             <q-toggle v-model="newEvent.showTeamLocation" :label="$t('showTeamLocation')" checked-icon="location_on" unchecked-icon="location_off" color="primary" size="lg" />
+            <q-toggle v-model="newEvent.showDirectionArrow" :label="$t('showDirectionArrow')" checked-icon="navigation" unchecked-icon="radio_button_unchecked" color="primary" size="lg" />
+            <div class="text-caption text-grey-7 q-mt-xs">{{ $t('showDirectionArrowDesc') }}</div>
 
             <q-separator />
 
@@ -131,6 +133,51 @@
 
             <q-separator />
 
+            <div class="text-subtitle2 text-weight-bold q-mb-xs">🚩 {{ $t('startReturnPoints') }}</div>
+            <div class="text-caption text-grey-7 q-mb-sm">{{ $t('startReturnDesc') }}</div>
+            <div class="row q-gutter-sm q-mb-sm">
+              <q-btn-toggle
+                v-model="newPointMode"
+                unelevated rounded toggle-color="primary"
+                :options="[
+                  { label: $t('setStartPoint'), value: 'start' },
+                  { label: $t('setReturnPoint'), value: 'return' },
+                ]"
+                :disable="newEvent.returnSameAsStart"
+              />
+            </div>
+            <q-toggle v-model="newEvent.returnSameAsStart" :label="$t('returnSameAsStart')" color="primary" class="q-mb-sm" @update:model-value="onNewReturnSameToggle" />
+            <div style="position:relative; border-radius:10px; overflow:hidden; height:220px;">
+              <div id="new-event-map" style="height:220px; width:100%;"></div>
+              <div class="new-event-zoom-btns">
+                <q-btn round elevated color="white" text-color="dark" icon="add" size="xs" @click="newEventMap && newEventMap.zoomIn()" />
+                <q-btn round elevated color="white" text-color="dark" icon="remove" size="xs" @click="newEventMap && newEventMap.zoomOut()" />
+              </div>
+              <div class="new-event-layer-btn">
+                <q-btn round elevated icon="layers" color="white" text-color="grey-8" size="xs">
+                  <q-menu anchor="top right" self="bottom right" :offset="[0, 6]">
+                    <q-list dense style="min-width:150px; padding: 4px;">
+                      <q-item v-for="layer in newEventBaseLayers" :key="layer.name" clickable @click="switchNewEventBase(layer)" v-close-popup :class="['layer-item', { 'layer-item--active': newEventBaseName === layer.name }]">
+                        <q-item-section>{{ layer.label }}</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+              </div>
+            </div>
+            <div class="row q-mt-xs q-gutter-md text-caption">
+              <div class="row items-center q-gutter-xs">
+                <div style="width:10px;height:10px;border-radius:50%;background:#43a047;"></div>
+                <span>{{ $t('startPoint') }}: {{ newEvent.startLat ? `${newEvent.startLat}, ${newEvent.startLng}` : $t('notSet') }}</span>
+              </div>
+              <div v-if="!newEvent.returnSameAsStart" class="row items-center q-gutter-xs">
+                <div style="width:10px;height:10px;border-radius:50%;background:#e53935;"></div>
+                <span>{{ $t('returnPoint') }}: {{ newEvent.returnLat ? `${newEvent.returnLat}, ${newEvent.returnLng}` : $t('notSet') }}</span>
+              </div>
+            </div>
+
+            <q-separator />
+
             <div class="text-subtitle2 text-weight-bold q-mb-xs">{{ $t('language') }}</div>
             <q-btn-toggle
               v-model="newEvent.language"
@@ -153,11 +200,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useEventsStore } from 'src/stores/events'
 import { api } from 'boot/axios'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -165,7 +214,78 @@ const store = useEventsStore()
 const events = computed(() => store.events)
 const skeletonRows = Array.from({ length: 4 }, (_, i) => ({ id: i }))
 const showNewEventDialog = ref(false)
-const defaultEvent = () => ({ name: '', description: '', isActive: false, showTeamLocation: true, startTime: null, endTime: null, firstFinishBonus: 0, language: 'en-US' })
+const defaultEvent = () => ({ name: '', description: '', isActive: false, showTeamLocation: true, showDirectionArrow: false, startTime: null, endTime: null, firstFinishBonus: 0, language: 'en-US', startLat: null, startLng: null, returnLat: null, returnLng: null, returnSameAsStart: true })
+
+const newPointMode = ref('start')
+let newEventMap = null
+let newEventStartMarker = null
+let newEventReturnMarker = null
+let newEventCurrentBase = null
+const newEventBaseLayers = ref([])
+const newEventBaseName = ref('topo')
+
+const newEventStartIcon = L.divIcon({ className: '', html: '<div style="width:14px;height:14px;border-radius:50%;background:#43a047;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })
+const newEventReturnIcon = L.divIcon({ className: '', html: '<div style="width:14px;height:14px;border-radius:50%;background:#e53935;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })
+
+function switchNewEventBase(layer) {
+  if (!newEventMap || !layer) return
+  if (newEventCurrentBase) newEventMap.removeLayer(newEventCurrentBase)
+  layer.tile.addTo(newEventMap)
+  newEventCurrentBase = layer.tile
+  newEventBaseName.value = layer.name
+  localStorage.setItem('adminMapLayer', layer.name)
+}
+
+function placeNewEventMarker(latlng, type) {
+  if (type === 'start') {
+    if (newEventStartMarker) newEventMap.removeLayer(newEventStartMarker)
+    newEventStartMarker = L.marker(latlng, { icon: newEventStartIcon }).addTo(newEventMap)
+    newEvent.value.startLat = Number(latlng.lat.toFixed(6))
+    newEvent.value.startLng = Number(latlng.lng.toFixed(6))
+    if (newEvent.value.returnSameAsStart) {
+      newEvent.value.returnLat = newEvent.value.startLat
+      newEvent.value.returnLng = newEvent.value.startLng
+    }
+  } else {
+    if (newEventReturnMarker) newEventMap.removeLayer(newEventReturnMarker)
+    newEventReturnMarker = L.marker(latlng, { icon: newEventReturnIcon }).addTo(newEventMap)
+    newEvent.value.returnLat = Number(latlng.lat.toFixed(6))
+    newEvent.value.returnLng = Number(latlng.lng.toFixed(6))
+  }
+}
+
+function onNewReturnSameToggle(val) {
+  if (val) {
+    if (newEventReturnMarker) { newEventMap.removeLayer(newEventReturnMarker); newEventReturnMarker = null }
+    newEvent.value.returnLat = newEvent.value.startLat
+    newEvent.value.returnLng = newEvent.value.startLng
+    newPointMode.value = 'start'
+  }
+}
+
+async function initNewEventMap() {
+  await nextTick()
+  if (newEventMap) return
+  newEventMap = L.map('new-event-map', { zoomControl: false }).setView([38.0, 23.7], 11)
+  newEventBaseLayers.value = [
+    { name: 'street',    label: '🗺️ Street',      tile: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }) },
+    { name: 'topo',      label: '⛰️ Topographic', tile: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '© OpenTopoMap' }) },
+    { name: 'satellite', label: '🛰️ Satellite',   tile: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: '© Esri' }) },
+    { name: 'dark',      label: '🌙 Dark',         tile: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© CartoDB' }) },
+  ]
+  const initName = localStorage.getItem('adminMapLayer') || 'topo'
+  newEventBaseName.value = initName
+  newEventCurrentBase = newEventBaseLayers.value.find(l => l.name === initName).tile
+  newEventCurrentBase.addTo(newEventMap)
+  newEventMap.on('click', (e) => placeNewEventMarker(e.latlng, newEvent.value.returnSameAsStart ? 'start' : newPointMode.value))
+  setTimeout(() => newEventMap.invalidateSize(), 150)
+}
+
+function destroyNewEventMap() {
+  if (newEventMap) { newEventMap.remove(); newEventMap = null; newEventStartMarker = null; newEventReturnMarker = null; newEventCurrentBase = null }
+  newEvent.value = defaultEvent()
+  newPointMode.value = 'start'
+}
 
 function formatDateTime(val) {
   if (!val) return ''
@@ -196,7 +316,6 @@ const createEvent = async () => {
     })
     store.addEvent(res.data)
     showNewEventDialog.value = false
-    newEvent.value = defaultEvent()
     $q.notify({ type: 'positive', message: t('eventOrchestrated'), position: 'top-right', timeout: 2500 })
   } catch (err) { console.error(err) }
 }
@@ -221,4 +340,19 @@ const confirmDeleteEvent = (eventRow) => {
 <style scoped>
 .admin-page { max-width: 900px; margin: 0 auto; }
 .tracking-tight { letter-spacing: -0.02em; }
+.new-event-zoom-btns {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.new-event-layer-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1000;
+}
 </style>
