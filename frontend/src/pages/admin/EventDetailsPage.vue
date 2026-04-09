@@ -36,6 +36,9 @@
             </q-menu>
           </q-btn>
         </div>
+        <div class="admin-locate-btn">
+          <q-btn round elevated icon="my_location" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="locateOnMap(map)" />
+        </div>
       </div>
     </q-card>
 
@@ -139,6 +142,9 @@
                   </q-menu>
                 </q-btn>
               </div>
+              <div class="edit-locate-btn">
+                <q-btn round elevated icon="my_location" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="xs" @click="locateOnMap(editMap)" />
+              </div>
               <div class="text-caption text-grey-6 edit-map-hint">{{ $t('clickMapToSet') }}</div>
             </div>
             <div>
@@ -227,6 +233,13 @@ function switchEditBase(layer) {
   editCurrentBaseTile = layer.tile
   editBaseName.value = layer.name
   localStorage.setItem('adminMapLayer', layer.name)
+}
+
+function locateOnMap(mapInstance) {
+  if (!mapInstance || !navigator.geolocation) return
+  navigator.geolocation.getCurrentPosition(pos => {
+    mapInstance.setView([pos.coords.latitude, pos.coords.longitude], 16)
+  })
 }
 
 function switchBase(layer) {
@@ -494,6 +507,18 @@ const confirmDelete = (cp) => {
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 1000;
+}
+.admin-locate-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 1000;
+}
+.edit-locate-btn {
+  position: absolute;
+  bottom: 28px;
+  right: 8px;
   z-index: 1000;
 }
 </style>

@@ -280,6 +280,9 @@
                     </q-menu>
                   </q-btn>
                 </div>
+                <div class="new-event-locate-btn">
+                  <q-btn round elevated icon="my_location" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="xs" @click="locateOnNewEventMap" />
+                </div>
               </div>
               <div class="row q-gutter-md text-caption">
                 <div class="row items-center q-gutter-xs">
@@ -384,6 +387,13 @@ watch(wizardStep, async (val) => {
     setTimeout(() => newEventMap.invalidateSize(), 150)
   }
 })
+
+function locateOnNewEventMap() {
+  if (!newEventMap || !navigator.geolocation) return
+  navigator.geolocation.getCurrentPosition(pos => {
+    newEventMap.setView([pos.coords.latitude, pos.coords.longitude], 15)
+  })
+}
 
 function switchNewEventBase(layer) {
   if (!newEventMap || !layer) return
@@ -553,6 +563,12 @@ const confirmDeleteEvent = (eventRow) => {
 .new-event-layer-btn {
   position: absolute;
   top: 8px;
+  right: 8px;
+  z-index: 1000;
+}
+.new-event-locate-btn {
+  position: absolute;
+  bottom: 8px;
   right: 8px;
   z-index: 1000;
 }

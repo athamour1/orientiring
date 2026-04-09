@@ -207,6 +207,9 @@
             </q-menu>
           </q-btn>
         </div>
+        <div class="points-locate-btn">
+          <q-btn round elevated icon="my_location" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="locateOnPointsMap" />
+        </div>
       </div>
 
       <div class="row q-mt-sm q-gutter-md text-caption">
@@ -262,6 +265,13 @@ let returnMarker = null
 let pointsCurrentBaseTile = null
 const pointsBaseLayers = ref([])
 const pointsBaseName = ref('topo')
+
+function locateOnPointsMap() {
+  if (!pointsMap || !navigator.geolocation) return
+  navigator.geolocation.getCurrentPosition(pos => {
+    pointsMap.setView([pos.coords.latitude, pos.coords.longitude], 15)
+  })
+}
 
 function switchPointsBase(layer) {
   if (!pointsMap || !layer) return
@@ -425,6 +435,12 @@ const confirmDelete = () => {
 .points-layer-btn {
   position: absolute;
   top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+.points-locate-btn {
+  position: absolute;
+  bottom: 10px;
   right: 10px;
   z-index: 1000;
 }
