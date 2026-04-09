@@ -36,11 +36,11 @@
 
     <!-- New Event Wizard -->
     <q-dialog v-model="showNewEventDialog" @hide="destroyNewEventMap" persistent>
-      <q-card style="min-width: 480px; width: 95vw; max-width: 620px; border-radius: 20px;">
-        <q-stepper v-model="wizardStep" ref="stepper" color="primary" animated flat header-nav>
+      <q-card :style="$q.screen.gt.sm ? 'width: 680px; max-width: 95vw;' : 'width: 95vw;'" style="border-radius: 20px;">
+        <q-stepper v-model="wizardStep" ref="stepper" color="primary" animated flat header-nav :contracted="$q.screen.lt.md">
 
           <!-- Step 1: Basics -->
-          <q-step :name="1" :title="$t('basics')" icon="edit_note" :done="wizardStep > 1">
+          <q-step :name="1" :title="$t('basics')" :caption="$q.screen.gt.sm ? $t('eventName') + ', ' + $t('eventDesc') : ''" icon="edit_note" :done="wizardStep > 1" prefix="1">
             <div class="q-gutter-md q-pt-sm">
               <q-input
                 v-model="newEvent.name"
@@ -69,7 +69,7 @@
           </q-step>
 
           <!-- Step 2: Settings -->
-          <q-step :name="2" :title="$t('settings')" icon="tune" :done="wizardStep > 2">
+          <q-step :name="2" :title="$t('settings')" :caption="$q.screen.gt.sm ? $t('showTeamLocation') + ', ' + $t('firstFinishBonus') : ''" icon="tune" :done="wizardStep > 2" prefix="2">
             <div class="q-gutter-md q-pt-sm">
               <q-toggle v-model="newEvent.isActive" :label="$t('activateImmediately')" checked-icon="check" unchecked-icon="clear" color="positive" size="lg" />
               <q-separator />
@@ -85,7 +85,7 @@
           </q-step>
 
           <!-- Step 3: Schedule -->
-          <q-step :name="3" :title="$t('eventTimer')" icon="schedule" :done="wizardStep > 3">
+          <q-step :name="3" :title="$t('eventTimer')" :caption="$q.screen.gt.sm ? $t('startTime') + ', ' + $t('endTime') : ''" icon="schedule" :done="wizardStep > 3" prefix="3">
             <div class="q-gutter-md q-pt-sm">
               <div class="text-caption text-grey-7">{{ $t('eventTimerDesc') }}</div>
               <div class="row q-col-gutter-md">
@@ -148,7 +148,7 @@
           </q-step>
 
           <!-- Step 4: Location -->
-          <q-step :name="4" :title="$t('startReturnPoints')" icon="flag">
+          <q-step :name="4" :title="$t('startReturnPoints')" :caption="$q.screen.gt.sm ? $t('clickMapToSet') : ''" icon="flag" prefix="4">
             <div class="q-gutter-sm q-pt-sm">
               <div class="text-caption text-grey-7">{{ $t('startReturnDesc') }}</div>
               <div class="row q-gutter-sm">
