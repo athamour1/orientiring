@@ -16,7 +16,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
   imports: [
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60000, limit: 120 },  // 120 req/min globally
+      { name: 'default', ttl: 60000, limit: 300 },  // 300 req/min globally
       { name: 'auth', ttl: 60000, limit: 10 },       // 10 req/min for auth (applied per controller)
     ]),
     PrismaModule,

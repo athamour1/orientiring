@@ -403,11 +403,11 @@ async function fetchStats(evId) {
 
 onMounted(async () => {
   if (!store.loaded) await store.fetchEvents()
-  events.value.forEach(ev => fetchStats(ev.id))
-})
-
-watch(events, (list) => {
-  list.forEach(ev => { if (!eventStats.value[ev.id]) fetchStats(ev.id) })
+  // Stagger stats requests to avoid rate limit
+  for (let i = 0; i < events.value.length; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 200))
+    fetchStats(events.value[i].id)
+  }
 })
 
 const copyLeaderboardLink = (eventId) => {
