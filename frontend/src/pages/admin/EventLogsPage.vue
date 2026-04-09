@@ -145,7 +145,6 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { api } from 'boot/axios'
 import { useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -153,7 +152,6 @@ import { AntPath } from 'leaflet-ant-path'
 import { useEventSocket } from 'src/composables/useEventSocket'
 
 const route = useRoute()
-const $q = useQuasar()
 const { t } = useI18n()
 const eventId = route.params.eventId
 const logs = ref([])

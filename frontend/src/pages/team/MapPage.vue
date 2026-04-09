@@ -85,7 +85,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted, watch } from 'vue'
 import { api } from 'boot/axios'
-import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useTeamEventStore } from 'src/stores/teamEvent'
 const teamEventStore = useTeamEventStore()
@@ -99,7 +98,6 @@ import { io } from 'socket.io-client'
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const map = ref(null)
-const $q = useQuasar()
 const { t, locale } = useI18n()
 const markers = ref([])
 const activeEvent = ref(null)
