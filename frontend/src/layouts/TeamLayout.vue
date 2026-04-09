@@ -67,7 +67,6 @@ const { timerLabel, timerColor, timerVisible } = useEventTimer(startTime, endTim
 
 const $q = useQuasar()
 const router = useRouter()
-const tab = ref('map')
 const { isInstallable, promptInstall } = usePwaInstall()
 // Active Event tracking is handled entirely via route nesting now!
 
