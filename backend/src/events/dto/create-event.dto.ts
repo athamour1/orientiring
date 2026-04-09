@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional, MaxLength, IsDateString, IsIn, IsInt, Min } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, MaxLength, IsDateString, IsIn, IsInt, Min, IsNumber } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
@@ -35,4 +35,28 @@ export class CreateEventDto {
   @IsInt()
   @Min(0)
   firstFinishBonus?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  showDirectionArrow?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  startLat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  startLng?: number;
+
+  @IsOptional()
+  @IsNumber()
+  returnLat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  returnLng?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  returnSameAsStart?: boolean;
 }
