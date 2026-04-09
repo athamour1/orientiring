@@ -13,7 +13,15 @@
         row-key="id"
         flat
         class="admin-table"
+        :loading="!store.loaded"
       >
+        <template v-slot:loading>
+          <q-inner-loading showing>
+            <div class="q-pa-md full-width">
+              <q-skeleton v-for="n in 4" :key="n" type="QBtn" height="48px" class="q-mb-sm" square />
+            </div>
+          </q-inner-loading>
+        </template>
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <q-btn flat round color="primary" dense icon="settings" @click="$router.push(`/admin/events/${props.row.id}`)">

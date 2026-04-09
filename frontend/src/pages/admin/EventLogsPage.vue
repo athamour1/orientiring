@@ -15,6 +15,7 @@
         <q-badge :color="isConnected ? 'green' : 'grey'" :label="isConnected ? 'Live' : 'Offline'" class="q-pa-xs" />
       </q-card-section>
       <div id="admin-live-map" style="height: 380px; width: 100%; position: relative;">
+        <q-skeleton v-if="!mapReady" square style="position:absolute;inset:0;width:100%;height:100%;z-index:10;" />
         <!-- Zoom controls -->
         <div class="admin-zoom-btns">
           <q-btn round elevated icon="add" color="white" text-color="grey-8" size="sm" @click="map.zoomIn()" />
@@ -155,6 +156,7 @@ const { t } = useI18n()
 const eventId = route.params.eventId
 const logs = ref([])
 const loading = ref(false)
+const mapReady = ref(false)
 const selectedTeamId = ref(null)
 const isConnected = ref(false)
 let map = null
@@ -399,6 +401,7 @@ onMounted(async () => {
   await nextTick()
 
   map = L.map('admin-live-map', { center: [0, 0], zoom: 2, zoomControl: false })
+  map.whenReady(() => { mapReady.value = true })
   const pane = map.createPane('selectedTeamPane')
   pane.style.zIndex = 650
 

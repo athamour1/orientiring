@@ -35,7 +35,14 @@
 
     <!-- Checkpoints Table -->
     <q-card flat bordered class="shadow-2">
-      <q-table :rows="checkpoints" :columns="columns" row-key="id" flat class="admin-table">
+      <q-table :rows="checkpoints" :columns="columns" row-key="id" flat class="admin-table" :loading="tableLoading">
+        <template v-slot:loading>
+          <q-inner-loading showing>
+            <div class="q-pa-md full-width">
+              <q-skeleton v-for="n in 5" :key="n" type="QBtn" height="48px" class="q-mb-sm" square />
+            </div>
+          </q-inner-loading>
+        </template>
         <template v-slot:top-right>
           <q-btn color="secondary" icon="archive" :label="$t('downloadAllQr')" unelevated no-caps @click="downloadAllQr" v-if="checkpoints.length > 0" />
         </template>
@@ -172,6 +179,7 @@ const $q = useQuasar()
 const { t } = useI18n()
 const eventId = route.params.eventId
 const checkpoints = ref([])
+const tableLoading = ref(true)
 const showDialog = ref(false)
 const previewDialog = ref(false)
 const editDialog = ref(false)
@@ -241,6 +249,7 @@ onMounted(async () => {
 let cpMarkers = []
 
 const fetchCheckpoints = async () => {
+  tableLoading.value = true
   try {
     const res = await api.get(`/admin/events/${eventId}/checkpoints`)
     checkpoints.value = res.data
@@ -278,6 +287,7 @@ const fetchCheckpoints = async () => {
       map.fitBounds(new L.featureGroup(cpMarkers).getBounds().pad(0.1))
     }
   } catch (err) { console.error(err) }
+  finally { tableLoading.value = false }
 }
 
 const openEditDialog = async (cp) => {

@@ -7,7 +7,14 @@
     </div>
 
     <q-card flat bordered class="shadow-2">
-      <q-table :rows="teams" :columns="columns" row-key="id" flat class="admin-table">
+      <q-table :rows="teams" :columns="columns" row-key="id" flat class="admin-table" :loading="tableLoading">
+        <template v-slot:loading>
+          <q-inner-loading showing>
+            <div class="q-pa-md full-width">
+              <q-skeleton v-for="n in 4" :key="n" type="QBtn" height="48px" class="q-mb-sm" square />
+            </div>
+          </q-inner-loading>
+        </template>
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <q-btn flat round color="secondary" dense icon="edit" class="q-mr-xs" @click="openEdit(props.row)" />
@@ -107,6 +114,7 @@ const route = useRoute()
 const eventId = route.params.eventId
 
 const teams = ref([])
+const tableLoading = ref(true)
 const showDialog = ref(false)
 const showCreatePwd = ref(false)
 const form = ref({ username: '', password: '' })
@@ -198,10 +206,12 @@ const columns = computed(() => [
 ])
 
 const fetchTeams = async () => {
+  tableLoading.value = true
   try {
     const res = await api.get(`/admin/events/${eventId}/teams`)
     teams.value = res.data
   } catch (err) { console.error(err) }
+  finally { tableLoading.value = false }
 }
 
 onMounted(() => {

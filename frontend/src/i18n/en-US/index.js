@@ -193,5 +193,6 @@ export default {
   cameraPermissionDenied: 'You denied camera access. This app needs the camera to scan QR codes.',
   cameraEnableHint: 'Tap the lock icon in your browser\'s address bar, allow Camera access, then retry.',
   retryCamera: 'Retry Camera Access',
-  backToMap: 'Back to Map'
+  backToMap: 'Back to Map',
+  loadingMap: 'Loading map...'
 }

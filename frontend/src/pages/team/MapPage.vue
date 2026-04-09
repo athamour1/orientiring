@@ -2,6 +2,17 @@
   <q-page class="relative-position" style="overflow: hidden;">
     <div id="map" class="absolute-full"></div>
 
+    <!-- Map skeleton until event data loads -->
+    <transition name="fade">
+      <div v-if="!mapReady" class="absolute-full map-skeleton-overlay">
+        <q-skeleton square class="absolute-full" />
+        <div class="map-skeleton-badge">
+          <q-spinner-orbit color="primary" size="32px" />
+          <span>{{ $t('loadingMap') }}</span>
+        </div>
+      </div>
+    </transition>
+
     <!-- Completion Banner — above footer -->
     <transition name="slide-up">
       <div v-if="allDone && !bannerDismissed" class="completion-banner">
@@ -98,6 +109,7 @@ const markers = ref([])
 const activeEvent = ref(null)
 const userMarker = ref(null)
 const heading = ref(null) // device compass heading in degrees
+const mapReady = ref(false)
 const allDone = ref(false)
 const timeExpired = ref(false)
 const bannerDismissed = ref(false)
@@ -351,6 +363,7 @@ const fetchEvent = async () => {
     activeEvent.value = res.data
     teamEventStore.startTime = res.data?.startTime ?? null
     teamEventStore.endTime = res.data?.endTime ?? null
+    mapReady.value = true
 
     // Apply language set by the admin for this event
     if (res.data?.language) {
@@ -516,6 +529,25 @@ watch(() => teamEventStore.endTime, (val) => {
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.map-skeleton-overlay {
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-skeleton-badge {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--q-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
 
 /* Completion banner — sits just above the bottom tab bar (58px) */
 .completion-banner {
