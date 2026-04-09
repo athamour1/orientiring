@@ -73,6 +73,19 @@ fi
 
 echo ""
 
+# ─── Bump version in package.json ───────────────────────────────────────────
+info "Bumping package.jsons to ${VERSION}..."
+cd frontend
+npm version "$VERSION" --no-git-tag-version --allow-same-version
+cd ..
+cd backend
+npm version "$VERSION" --no-git-tag-version --allow-same-version
+cd ..
+git add .
+git commit -m "chore(release): bump version to ${VERSION}"
+git push
+ok "Version bumped, committed and pushed"
+
 # ─── Create Git tag & GitHub release ────────────────────────────────────────────
 info "Creating Git tag ${TAG}..."
 git tag -a "$TAG" -m "Release ${TAG}"
@@ -85,16 +98,6 @@ gh release create "$TAG" \
   --title "🧭 Oriento ${TAG}" \
   --generate-notes
 ok "GitHub release created"
-
-# ─── Bump version in package.json ───────────────────────────────────────────
-info "Bumping frontend/package.json to ${VERSION}..."
-cd frontend
-npm version "$VERSION" --no-git-tag-version --allow-same-version
-cd ..
-git add frontend/package.json
-git commit -m "chore(release): bump version to ${VERSION}"
-git push
-ok "Version bumped, committed and pushed"
 
 # ─── Login to GHCR ─────────────────────────────────────────────────────────────
 info "Logging in to ${REGISTRY}..."

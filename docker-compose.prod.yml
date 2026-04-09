@@ -9,7 +9,7 @@ services:
       - postgres_data_prod:/var/lib/postgresql/data
 
   backend:
-    image: ghcr.io/athamour1/orientiring/backend:latest
+    image: ghcr.io/athamour1/oriento/backend:latest
     container_name: orienteering_backend_prod
     restart: always
     depends_on:
@@ -20,7 +20,7 @@ services:
       - ./backend/.env.prod
 
   frontend:
-    image: ghcr.io/athamour1/orientiring/frontend:latest
+    image: ghcr.io/athamour1/oriento/frontend:latest
     container_name: orienteering_frontend_prod
     restart: always
     ports:
