@@ -53,7 +53,7 @@
     <q-btn
       round unelevated
       icon="my_location"
-      :color="followMode ? 'primary' : 'white'"
+      :color="followMode ? 'primary' : ($q.dark.isActive ? 'dark' : 'white')"
       :text-color="followMode ? 'white' : 'primary'"
       size="md"
       class="locate-btn shadow-4"
@@ -85,8 +85,10 @@
 <script setup>
 import { onMounted, ref, onUnmounted, watch } from 'vue'
 import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useTeamEventStore } from 'src/stores/teamEvent'
+const $q = useQuasar()
 const teamEventStore = useTeamEventStore()
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
