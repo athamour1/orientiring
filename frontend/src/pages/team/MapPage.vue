@@ -27,12 +27,12 @@
 
     <!-- Zoom controls -->
     <div class="zoom-btns">
-      <q-btn round elevated icon="add" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm" @click="map.zoomIn()" />
-      <q-btn round elevated icon="remove" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm" @click="map.zoomOut()" />
+      <q-btn round elevated icon="add" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="map.zoomIn()" />
+      <q-btn round elevated icon="remove" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="map.zoomOut()" />
     </div>
 
     <!-- Layer picker -->
-    <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="md" class="layer-btn shadow-4">
+    <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="md" class="layer-btn shadow-4">
       <q-menu anchor="bottom right" self="top right" :offset="[0, 8]" class="layer-menu">
         <q-list dense style="min-width:160px; padding: 6px;">
           <q-item

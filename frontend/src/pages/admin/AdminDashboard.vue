@@ -266,11 +266,11 @@
               <div style="position:relative; border-radius:10px; overflow:hidden; height:240px;">
                 <div id="new-event-map" style="height:240px; width:100%;"></div>
                 <div class="new-event-zoom-btns">
-                  <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="add" size="xs" @click="newEventMap && newEventMap.zoomIn()" />
-                  <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="remove" size="xs" @click="newEventMap && newEventMap.zoomOut()" />
+                  <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="add" size="xs" @click="newEventMap && newEventMap.zoomIn()" />
+                  <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="remove" size="xs" @click="newEventMap && newEventMap.zoomOut()" />
                 </div>
                 <div class="new-event-layer-btn">
-                  <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="xs">
+                  <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="xs">
                     <q-menu anchor="top right" self="bottom right" :offset="[0, 6]">
                       <q-list dense style="min-width:150px; padding: 4px;">
                         <q-item v-for="layer in newEventBaseLayers" :key="layer.name" clickable @click="switchNewEventBase(layer)" v-close-popup :class="['layer-item', { 'layer-item--active': newEventBaseName === layer.name }]">

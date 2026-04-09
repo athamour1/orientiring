@@ -20,12 +20,12 @@
         </transition>
         <!-- Zoom controls -->
         <div class="admin-zoom-btns">
-          <q-btn round elevated icon="add" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm" @click="map.zoomIn()" />
-          <q-btn round elevated icon="remove" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm" @click="map.zoomOut()" />
+          <q-btn round elevated icon="add" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="map.zoomIn()" />
+          <q-btn round elevated icon="remove" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm" @click="map.zoomOut()" />
         </div>
         <!-- Custom layer picker -->
         <div class="admin-layer-btn">
-          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm">
+          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm">
             <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
               <q-list dense style="min-width:170px; padding: 6px;">
                 <q-item

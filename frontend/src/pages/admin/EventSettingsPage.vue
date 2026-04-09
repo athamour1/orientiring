@@ -186,11 +186,11 @@
       <div style="position: relative; border-radius: 12px; overflow: hidden;">
         <div id="points-map" style="height: 280px; width: 100%;"></div>
         <div class="points-zoom-btns">
-          <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="add" size="sm" @click="pointsMap && pointsMap.zoomIn()" />
-          <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="remove" size="sm" @click="pointsMap && pointsMap.zoomOut()" />
+          <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="add" size="sm" @click="pointsMap && pointsMap.zoomIn()" />
+          <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="remove" size="sm" @click="pointsMap && pointsMap.zoomOut()" />
         </div>
         <div class="points-layer-btn">
-          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm">
+          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm">
             <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
               <q-list dense style="min-width:160px; padding: 6px;">
                 <q-item

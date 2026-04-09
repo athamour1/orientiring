@@ -15,11 +15,11 @@
           </div>
         </transition>
         <div class="admin-zoom-btns">
-          <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="add" size="sm" @click="map && map.zoomIn()" />
-          <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="remove" size="sm" @click="map && map.zoomOut()" />
+          <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="add" size="sm" @click="map && map.zoomIn()" />
+          <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="remove" size="sm" @click="map && map.zoomOut()" />
         </div>
         <div class="admin-layer-btn">
-          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="sm">
+          <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="sm">
             <q-menu anchor="top right" self="bottom right" :offset="[0, 8]" class="layer-menu">
               <q-list dense style="min-width:160px; padding: 6px;">
                 <q-item
@@ -118,11 +118,11 @@
             <div style="position:relative; border-radius:10px; overflow:hidden; height:200px;">
               <div id="edit-map" style="height:200px; width:100%;"></div>
               <div class="edit-zoom-btns">
-                <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="add" size="xs" @click="editMap && editMap.zoomIn()" />
-                <q-btn round elevated :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'dark'" icon="remove" size="xs" @click="editMap && editMap.zoomOut()" />
+                <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="add" size="xs" @click="editMap && editMap.zoomIn()" />
+                <q-btn round elevated :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" icon="remove" size="xs" @click="editMap && editMap.zoomOut()" />
               </div>
               <div class="edit-layer-btn">
-                <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'grey-9' : 'white'" :text-color="$q.dark.isActive ? 'grey-3' : 'grey-8'" size="xs">
+                <q-btn round elevated icon="layers" :color="$q.dark.isActive ? 'dark' : 'white'" text-color="primary" size="xs">
                   <q-menu anchor="top right" self="bottom right" :offset="[0, 6]" class="layer-menu">
                     <q-list dense style="min-width:150px; padding: 4px;">
                       <q-item
