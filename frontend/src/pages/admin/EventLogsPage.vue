@@ -15,7 +15,11 @@
         <q-badge :color="isConnected ? 'green' : 'grey'" :label="isConnected ? 'Live' : 'Offline'" class="q-pa-xs" />
       </q-card-section>
       <div id="admin-live-map" style="height: 380px; width: 100%; position: relative;">
-        <q-skeleton v-if="!mapReady" square style="position:absolute;inset:0;width:100%;height:100%;z-index:10;" />
+        <transition name="fade">
+          <div v-if="!mapReady" style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+            <q-spinner-orbit color="primary" size="48px" />
+          </div>
+        </transition>
         <!-- Zoom controls -->
         <div class="admin-zoom-btns">
           <q-btn round elevated icon="add" color="white" text-color="grey-8" size="sm" @click="map.zoomIn()" />

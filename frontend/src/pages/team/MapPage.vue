@@ -2,14 +2,10 @@
   <q-page class="relative-position" style="overflow: hidden;">
     <div id="map" class="absolute-full"></div>
 
-    <!-- Map skeleton until event data loads -->
+    <!-- Transparent spinner overlay until event data loads -->
     <transition name="fade">
-      <div v-if="!mapReady" class="absolute-full map-skeleton-overlay">
-        <q-skeleton square class="absolute-full" />
-        <div class="map-skeleton-badge">
-          <q-spinner-orbit color="primary" size="32px" />
-          <span>{{ $t('loadingMap') }}</span>
-        </div>
+      <div v-if="!mapReady" class="absolute-full map-loading-overlay">
+        <q-spinner-orbit color="primary" size="48px" />
       </div>
     </transition>
 
@@ -530,23 +526,12 @@ watch(() => teamEventStore.endTime, (val) => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-.map-skeleton-overlay {
+.map-loading-overlay {
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.map-skeleton-badge {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: var(--q-primary);
-  font-size: 0.85rem;
-  font-weight: 600;
-  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* Completion banner — sits just above the bottom tab bar (58px) */
