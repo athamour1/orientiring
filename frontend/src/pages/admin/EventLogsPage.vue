@@ -229,12 +229,14 @@ function makeRingIcon(filled, total) {
   const circumference = 2 * Math.PI * r
   const pct = total === 0 ? 0 : Math.round((filled / total) * 100)
   const dash = (pct / 100) * circumference
+  const gap = circumference - dash
   const color = ringColor(pct)
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="#e0e0e0" stroke-width="${sw}" />
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
-      stroke-dasharray="${dash} ${circumference}" stroke-dashoffset="${circumference / 4}"
+      stroke-dasharray="${dash} ${gap}"
+      transform="rotate(-90 ${cx} ${cy})"
       stroke-linecap="round" />
     <text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="10" font-weight="bold" fill="#111" font-family="sans-serif">${filled}/${total}</text>
   </svg>`
