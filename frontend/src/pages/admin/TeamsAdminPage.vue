@@ -101,7 +101,7 @@
 
     <!-- CSV Import Modal -->
     <q-dialog v-model="showImportDialog" @hide="onImportHide" persistent>
-      <q-card style="min-width: 520px; max-width: 600px;" class="q-pa-sm">
+      <q-card style="min-width: 520px; max-width: 600px; border-radius: 16px;" class="q-pa-sm">
         <q-card-section>
           <div class="text-h6 text-weight-bold tracking-tight">{{ $t('importTeams') }}</div>
         </q-card-section>
