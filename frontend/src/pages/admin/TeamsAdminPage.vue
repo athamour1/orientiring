@@ -320,7 +320,6 @@ const checkUsername = (val) => {
 }
 
 const columns = computed(() => [
-  { name: 'id', required: true, label: t('id'), align: 'left', field: 'id', sortable: true },
   { name: 'username', required: true, label: t('teamUsername'), align: 'left', field: 'username', sortable: true },
   { name: 'actions', label: t('actions'), align: 'right' }
 ])
