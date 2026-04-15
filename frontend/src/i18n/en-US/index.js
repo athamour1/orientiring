@@ -220,5 +220,9 @@ export default {
   parseData: 'Parse Data',
   back: 'Back',
   importMore: 'Import More',
-  noValidRows: 'No valid rows found. Use format: username,password'
+  noValidRows: 'No valid rows found. Use format: username,password',
+  somethingWentWrong: 'Something went wrong',
+  errorDescription: 'An unexpected error occurred. Try reloading the page.',
+  reloadPage: 'Reload Page',
+  errorDetails: 'Error Details'
 }

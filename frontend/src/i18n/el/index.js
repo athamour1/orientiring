@@ -220,5 +220,9 @@ export default {
   parseData: 'Ανάλυση Δεδομένων',
   back: 'Πίσω',
   importMore: 'Εισαγωγή Περισσότερων',
-  noValidRows: 'Δεν βρέθηκαν έγκυρες γραμμές. Χρησιμοποιήστε μορφή: username,password'
+  noValidRows: 'Δεν βρέθηκαν έγκυρες γραμμές. Χρησιμοποιήστε μορφή: username,password',
+  somethingWentWrong: 'Κάτι πήγε στραβά',
+  errorDescription: 'Παρουσιάστηκε απροσδόκητο σφάλμα. Δοκιμάστε να φορτώσετε ξανά τη σελίδα.',
+  reloadPage: 'Επαναφόρτωση Σελίδας',
+  errorDetails: 'Λεπτομέρειες Σφάλματος'
 }
