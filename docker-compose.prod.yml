@@ -45,5 +45,19 @@ services:
       timeout: 5s
       retries: 3
 
+  # One-off service for running migrations and seeding before deployment
+  # Usage: docker compose -f docker-compose.prod.yml run --rm migrate
+  migrate:
+    image: ghcr.io/athamour1/oriento/backend:latest
+    container_name: orienteering_migrate_prod
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env.prod
+    command: sh -c "npx prisma migrate deploy && npx ts-node seed.ts"
+    profiles:
+      - migration
+
 volumes:
   postgres_data_prod:
