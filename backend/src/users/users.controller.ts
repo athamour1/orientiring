@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Put, Body, UseGuards, ConflictException, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Post, Get, Put, Body, UseGuards, ConflictException, BadRequestException, Param, Delete, Query } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -39,11 +40,18 @@ export class UsersController {
     return { id: user.id, username: user.username };
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('import')
   async importTeams(
     @Param('eventId') eventId: string,
     @Body() body: { teams: { username: string; password: string }[] },
   ) {
+    if (!body.teams || body.teams.length === 0) {
+      throw new BadRequestException('No teams provided');
+    }
+    if (body.teams.length > 100) {
+      throw new BadRequestException('Maximum 100 teams per import');
+    }
     const results: { username: string; success: boolean; error?: string }[] = [];
     for (const team of body.teams) {
       if (!team.username || !team.password) {
