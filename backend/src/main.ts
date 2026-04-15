@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
@@ -25,6 +26,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
   app.useGlobalFilters(new PrismaExceptionFilter());
+  app.use(helmet());
 
   const origins = process.env.CORS_ORIGIN!.split(',').map((o) => o.trim());
   app.enableCors({ origin: origins, credentials: true });
