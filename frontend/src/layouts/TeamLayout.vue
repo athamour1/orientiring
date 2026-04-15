@@ -29,7 +29,7 @@
       <router-view />
     </q-page-container>
 
-    <q-footer bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
+    <q-footer v-if="!isLobby" bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
       <q-tabs no-caps active-color="primary" indicator-color="transparent" align="justify" class="text-grey-7">
         <q-route-tab class="footer-tab" name="map" icon="map" :label="$t('map')" to="/team/map" exact />
         <q-route-tab v-if="!teamEventStore.allDone" class="footer-tab" name="scan" icon="qr_code_scanner" :label="$t('scanner')" to="/team/scan" exact />
@@ -41,7 +41,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import { usePwaInstall } from 'src/composables/usePwaInstall'
@@ -54,7 +54,9 @@ const { timerLabel, timerColor, timerVisible } = useEventTimer(startTime, endTim
 
 const $q = useQuasar()
 const router = useRouter()
+const route = useRoute()
 const { isInstallable, promptInstall } = usePwaInstall()
+const isLobby = computed(() => route.path === '/team/lobby')
 // Active Event tracking is handled entirely via route nesting now!
 
 const toggleDark = () => {

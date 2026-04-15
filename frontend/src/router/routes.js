@@ -22,6 +22,7 @@ const routes = [
     path: '/team',
     component: () => import('layouts/TeamLayout.vue'),
     children: [
+      { path: 'lobby', component: () => import('pages/team/LobbyPage.vue') },
       { path: 'map', component: () => import('pages/team/MapPage.vue') },
       { path: 'scan', component: () => import('pages/team/ScanPage.vue') },
       { path: 'leaderboard', component: () => import('pages/public/LeaderboardPage.vue') }

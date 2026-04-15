@@ -202,5 +202,9 @@ export default {
   cameraEnableHint: 'Tap the lock icon in your browser\'s address bar, allow Camera access, then retry.',
   retryCamera: 'Retry Camera Access',
   backToMap: 'Back to Map',
-  loadingMap: 'Loading map...'
+  loadingMap: 'Loading map...',
+  eventStartsIn: 'Event starts in',
+  waitingForOrganizer: 'Waiting for the organizer to start the event...',
+  scheduledEvent: 'Scheduled',
+  pendingActivation: 'Pending activation'
 }
