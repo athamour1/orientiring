@@ -29,5 +29,5 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 # Expose backend port
 EXPOSE 3000
 
-# Start command handles DB migrations, seeding, and starting the compiled app
-CMD ["sh", "-c", "npx prisma db push && npx ts-node seed.ts && node dist/src/main"]
+# Only start the app — migrations and seeding are separate deployment steps
+CMD ["node", "dist/src/main"]
