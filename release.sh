@@ -56,10 +56,13 @@ fi
 # ─── Confirmation ───────────────────────────────────────────────────────────────
 echo ""
 info "This will:"
-echo "   1. Build Docker images for backend & frontend"
-echo "   2. Push images to ${REGISTRY}/${REPO}"
-echo "   3. Create Git tag ${TAG}"
-echo "   4. Create GitHub release ${TAG}"
+echo "   1. Run pre-release checks (build, test, lint)"
+echo "   2. Generate changelog from commits"
+echo "   3. Bump version in package.json files"
+echo "   4. Build Docker images for backend & frontend"
+echo "   5. Push images to ${REGISTRY}/${REPO}"
+echo "   6. Create Git tag ${TAG}"
+echo "   7. Create GitHub release with changelog"
 echo ""
 echo -e "   📦 ${BACKEND_IMAGE}:${TAG}"
 echo -e "   📦 ${FRONTEND_IMAGE}:${TAG}"
@@ -72,6 +75,54 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
+
+# ─── Pre-release verification ───────────────────────────────────────────────
+info "Running pre-release checks..."
+
+info "Checking working tree is clean..."
+if [ -n "$(git status --porcelain)" ]; then
+  error "Working tree is not clean. Commit or stash your changes first."
+fi
+ok "Working tree clean"
+
+info "Building backend..."
+(cd backend && npm run build)
+ok "Backend builds successfully"
+
+info "Running backend tests..."
+(cd backend && npm test -- --passWithNoTests)
+ok "Backend tests pass"
+
+info "Running backend lint..."
+(cd backend && npm run lint)
+ok "Backend lint passes"
+
+echo ""
+
+# ─── Generate changelog ─────────────────────────────────────────────────────
+info "Generating changelog..."
+PREV_TAG=$(git describe --tags --abbrev=0 HEAD 2>/dev/null || echo "")
+if [ -n "$PREV_TAG" ]; then
+  CHANGELOG=$(git log --oneline --no-merges "${PREV_TAG}..HEAD" 2>/dev/null || echo "")
+  if [ -z "$CHANGELOG" ]; then
+    CHANGELOG=$(git log --oneline --no-merges -20)
+    warn "No commits since ${PREV_TAG}, using last 20 commits"
+  else
+    info "Changes since ${PREV_TAG}:"
+  fi
+else
+  CHANGELOG=$(git log --oneline --no-merges -20)
+  info "No previous tag found, using last 20 commits"
+fi
+echo "$CHANGELOG" | sed 's/^/   /'
+echo ""
+
+# Build release notes
+RELEASE_NOTES="## What's Changed
+
+$(echo "$CHANGELOG" | sed 's/^[a-f0-9]* /- /')
+
+**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG:-initial}...${TAG}"
 
 # ─── Bump version in package.json ───────────────────────────────────────────
 info "Bumping package.jsons to ${VERSION}..."
@@ -96,7 +147,7 @@ info "Creating GitHub release..."
 gh release create "$TAG" \
   --repo "$REPO" \
   --title "🧭 Oriento ${TAG}" \
-  --generate-notes
+  --notes "$RELEASE_NOTES"
 ok "GitHub release created"
 
 # ─── Login to GHCR ─────────────────────────────────────────────────────────────
