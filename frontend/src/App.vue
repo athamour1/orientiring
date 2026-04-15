@@ -1,11 +1,14 @@
 <template>
-  <router-view />
+  <ErrorBoundary>
+    <router-view />
+  </ErrorBoundary>
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { usePwaInstall } from 'src/composables/usePwaInstall'
+import ErrorBoundary from 'src/components/ErrorBoundary.vue'
 
 const $q = useQuasar()
 const { setPrompt, clearPrompt, autoPromptSuppressed, promptInstall, dismissAutoPrompt } = usePwaInstall()
