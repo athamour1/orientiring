@@ -84,11 +84,13 @@
 
 <script setup>
 import { onMounted, ref, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useTeamEventStore } from 'src/stores/teamEvent'
 const $q = useQuasar()
+const router = useRouter()
 const teamEventStore = useTeamEventStore()
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -359,6 +361,17 @@ const fetchEvent = async () => {
     activeEvent.value = res.data
     teamEventStore.startTime = res.data?.startTime ?? null
     teamEventStore.endTime = res.data?.endTime ?? null
+    teamEventStore.eventStatus = res.data?.status ?? null
+    teamEventStore.eventId = res.data?.id ?? null
+    teamEventStore.eventName = res.data?.name ?? null
+    teamEventStore.eventDescription = res.data?.description ?? null
+
+    // Redirect to lobby if event hasn't started yet
+    if (res.data?.status === 'pending') {
+      router.replace('/team/lobby')
+      return
+    }
+
     mapReady.value = true
 
     // Apply language set by the admin for this event

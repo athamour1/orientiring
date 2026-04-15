@@ -59,10 +59,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { QrcodeStream } from 'vue-qrcode-reader'
 import { api } from 'boot/axios'
 import { useI18n } from 'vue-i18n'
+import { useTeamEventStore } from 'src/stores/teamEvent'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const teamEventStore = useTeamEventStore()
 const cameraBlocked = ref(false)
 const permissionDenied = ref(false)
 const retrying = ref(false)
@@ -70,6 +72,10 @@ const scanResult = ref(null)
 let isProcessing = false
 
 onMounted(() => {
+  if (teamEventStore.eventStatus === 'pending') {
+    router.replace('/team/lobby')
+    return
+  }
   if (route.query.qr) {
     processScan(route.query.qr)
   }
