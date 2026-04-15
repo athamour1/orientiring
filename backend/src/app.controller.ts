@@ -15,7 +15,12 @@ export class AppController {
   }
 
   @Get('health')
-  async getHealth() {
+  getHealth() {
+    return { status: 'ok' };
+  }
+
+  @Get('readiness')
+  async getReadiness() {
     await this.prisma.$queryRawUnsafe('SELECT 1');
     return { status: 'ok' };
   }
