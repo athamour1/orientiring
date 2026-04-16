@@ -35,7 +35,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     }),
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60000, limit: 300 }, // 300 req/min globally
+      { name: 'default', ttl: 60000, limit: 600 }, // 600 req/min globally (supports ~10 teams + admin behind same IP)
       { name: 'auth', ttl: 60000, limit: 10 }, // 10 req/min for auth (applied per controller)
     ]),
     PrismaModule,

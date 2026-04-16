@@ -14,9 +14,11 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '@prisma/client';
+import { SkipThrottle } from '@nestjs/throttler';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 
+@SkipThrottle()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/events')
 export class EventsController {

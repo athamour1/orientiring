@@ -11,7 +11,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -19,6 +19,7 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+@SkipThrottle()
 @Controller('admin/events/:eventId/teams')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -28,7 +29,6 @@ export class UsersController {
     private readonly prisma: PrismaService,
   ) {}
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Get('check-username')
   async checkUsername(@Query('username') username: string) {
     const start = Date.now();
@@ -66,7 +66,6 @@ export class UsersController {
     return { id: user.id, username: user.username };
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('import')
   async importTeams(
     @Param('eventId') eventId: string,

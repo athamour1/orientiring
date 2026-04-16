@@ -16,9 +16,11 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from '@prisma/client';
 import * as QRCode from 'qrcode';
 import type { Response } from 'express';
+import { SkipThrottle } from '@nestjs/throttler';
 import { CreateCheckpointDto } from './dto/create-checkpoint.dto';
 import { UpdateCheckpointDto } from './dto/update-checkpoint.dto';
 
+@SkipThrottle()
 @Controller('admin/events/:eventId/checkpoints')
 export class CheckpointsController {
   constructor(private readonly checkpointsService: CheckpointsService) {}

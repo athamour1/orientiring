@@ -47,11 +47,16 @@ export class EventsScheduler {
           error.code.startsWith('P10'));
 
       if (isConnectionError) {
-        this.logger.warn('DB connection lost, reconnecting…');
+        this.logger.warn('DB connection lost, will retry on next tick');
         try {
           await this.prisma.$disconnect();
         } catch {}
-        await this.prisma.$connect();
+        try {
+          await this.prisma.$connect();
+          this.logger.log('DB reconnected successfully');
+        } catch {
+          this.logger.warn('DB still unavailable, retrying in next cycle');
+        }
       } else {
         this.logger.error('Scheduler error', error);
       }
