@@ -129,7 +129,6 @@ function switchBase(layer) {
   localStorage.setItem('mapLayer', layer.name)
 }
 let watchId = null
-let eventInterval = null
 let endTimeTimeout = null
 let initialMapFit = false
 let lastSentLat = null
@@ -217,14 +216,27 @@ onMounted(async () => {
     shadowUrl: markerShadow,
   });
 
-  // Connect socket for sending location updates (no polling REST)
+  // Connect socket for sending location updates and receiving event state changes
   locationSocket = io(SOCKET_URL, {
     transports: ['websocket'],
     auth: { token: localStorage.getItem('token') },
   })
 
   await fetchEvent()
-  eventInterval = setInterval(fetchEvent, 30000)
+
+  // Listen for event state changes via WS instead of polling
+  if (teamEventStore.eventId) {
+    const eid = Number(teamEventStore.eventId)
+    locationSocket.emit('join', eid)
+    locationSocket.on('event:ended', () => fetchEvent())
+    locationSocket.on('event:activated', () => fetchEvent())
+
+    // On reconnect: re-join event room and resync state
+    locationSocket.on('connect', () => {
+      locationSocket.emit('join', eid)
+      fetchEvent()
+    })
+  }
 
   // Always track GPS — admin needs location data even when showTeamLocation is off
   if (navigator.geolocation) {
@@ -350,7 +362,6 @@ onUnmounted(() => {
   if (watchId !== null && navigator.geolocation) {
     navigator.geolocation.clearWatch(watchId)
   }
-  if (eventInterval) clearInterval(eventInterval)
   if (endTimeTimeout) clearTimeout(endTimeTimeout)
   locationSocket?.disconnect()
 })

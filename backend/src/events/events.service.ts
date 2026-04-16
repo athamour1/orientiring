@@ -7,6 +7,9 @@ import { EventsGateway } from './events.gateway';
 
 @Injectable()
 export class EventsService {
+  private dashboardCache: { data: any; expiresAt: number } | null = null;
+  private static readonly DASHBOARD_CACHE_TTL = 30_000; // 30 seconds
+
   constructor(
     private prisma: PrismaService,
     @Inject(forwardRef(() => EventsGateway)) private gateway: EventsGateway,
@@ -90,6 +93,13 @@ export class EventsService {
   }
 
   async getDashboardStats() {
+    if (
+      this.dashboardCache &&
+      Date.now() < this.dashboardCache.expiresAt
+    ) {
+      return this.dashboardCache.data;
+    }
+
     const [teamCounts, checkpointCounts, scanCounts] = await Promise.all([
       this.prisma.user.groupBy({ by: ['eventId'], _count: { _all: true } }),
       this.prisma.checkpoint.groupBy({
@@ -141,6 +151,11 @@ export class EventsService {
         result[evId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
       result[evId].scanCount = count;
     }
+
+    this.dashboardCache = {
+      data: result,
+      expiresAt: Date.now() + EventsService.DASHBOARD_CACHE_TTL,
+    };
     return result;
   }
 
@@ -228,6 +243,40 @@ export class EventsService {
     }
 
     return location;
+  }
+
+  getUserInfo(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, eventId: true },
+    });
+  }
+
+  async bulkUpsertLocations(
+    entries: Map<number, { latitude: number; longitude: number }>,
+  ) {
+    const ops: any[] = [];
+    for (const [userId, loc] of entries) {
+      ops.push(
+        this.prisma.teamLocation.upsert({
+          where: { teamId: userId },
+          create: {
+            teamId: userId,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          },
+          update: { latitude: loc.latitude, longitude: loc.longitude },
+        }),
+        this.prisma.teamRoute.create({
+          data: {
+            teamId: userId,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          },
+        }),
+      );
+    }
+    await this.prisma.$transaction(ops);
   }
 
   getTeamRoute(teamId: number) {

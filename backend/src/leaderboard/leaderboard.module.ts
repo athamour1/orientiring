@@ -5,5 +5,6 @@ import { LeaderboardController } from './leaderboard.controller';
 @Module({
   providers: [LeaderboardService],
   controllers: [LeaderboardController],
+  exports: [LeaderboardService],
 })
 export class LeaderboardModule {}

@@ -73,7 +73,6 @@ const countdownLabel = computed(() => {
 })
 
 let tickInterval = null
-let pollInterval = null
 let socket = null
 
 async function fetchEvent() {
@@ -113,19 +112,19 @@ onMounted(async () => {
   tickInterval = setInterval(() => { now.value = Date.now() }, 1000)
 
   await fetchEvent()
-  pollInterval = setInterval(fetchEvent, 30000)
 
-  // WebSocket — listen for instant activation
+  // WebSocket — listen for instant activation (no polling needed)
   if (teamEventStore.eventId) {
     const ws = useEventSocket(teamEventStore.eventId)
     socket = ws.socket
     socket.on('event:activated', goToMap)
+    // On reconnect, resync event state in case we missed an activation
+    socket.on('connect', () => fetchEvent())
   }
 })
 
 onUnmounted(() => {
   clearInterval(tickInterval)
-  clearInterval(pollInterval)
 })
 </script>
 

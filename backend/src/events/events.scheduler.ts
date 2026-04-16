@@ -39,6 +39,26 @@ export class EventsScheduler {
           `Auto-activated event "${event.name}" (id=${event.id})`,
         );
       }
+
+      // Auto-deactivate events whose endTime has passed
+      const toDeactivate = await this.prisma.event.findMany({
+        where: {
+          isActive: true,
+          endTime: { not: null, lte: now },
+        },
+        select: { id: true, name: true },
+      });
+
+      for (const event of toDeactivate) {
+        await this.prisma.event.update({
+          where: { id: event.id },
+          data: { isActive: false },
+        });
+        this.gateway.emitEventEnded(event.id);
+        this.logger.log(
+          `Auto-deactivated event "${event.name}" (id=${event.id})`,
+        );
+      }
     } catch (error: unknown) {
       const isConnectionError =
         error instanceof Prisma.PrismaClientInitializationError ||
