@@ -16,9 +16,16 @@ export class UsersController {
     private readonly prisma: PrismaService
   ) {}
 
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Get('check-username')
   async checkUsername(@Query('username') username: string) {
+    const start = Date.now();
     const existing = await this.usersService.findByUsername(username);
+    // Constant-time response: ensure at least 200ms to prevent timing-based enumeration
+    const elapsed = Date.now() - start;
+    if (elapsed < 200) {
+      await new Promise((r) => setTimeout(r, 200 - elapsed));
+    }
     return { taken: !!existing };
   }
 
