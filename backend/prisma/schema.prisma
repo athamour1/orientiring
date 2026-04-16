@@ -25,6 +25,8 @@ model User {
   scans        Scan[]
   location     TeamLocation?
   route        TeamRoute[]
+
+  @@index([eventId])
 }
 
 model Event {
@@ -61,6 +63,8 @@ model Checkpoint {
   
   event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   scans          Scan[]
+
+  @@index([eventId])
 }
 
 model Scan {
@@ -94,4 +98,6 @@ model TeamRoute {
   recordedAt  DateTime @default(now())
 
   team        User     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
 }
