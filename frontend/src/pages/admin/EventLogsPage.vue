@@ -431,7 +431,7 @@ onMounted(async () => {
   const { socket, isConnected: socketConnected } = useEventSocket(eventId)
   watch(socketConnected, v => { isConnected.value = v }, { immediate: true })
 
-  socket.on('scan:created', (payload) => {
+  const onScanCreated = (payload) => {
     logs.value.unshift({
       id: Date.now(),
       team: { id: payload.teamId, username: payload.teamUsername },
@@ -443,9 +443,9 @@ onMounted(async () => {
     if (!allTeams.value.find(t => t.id === payload.teamId)) {
       allTeams.value.push({ id: payload.teamId, username: payload.teamUsername })
     }
-  })
+  }
 
-  socket.on('first:finish', (payload) => {
+  const onFirstFinish = (payload) => {
     logs.value.unshift({
       id: `ff-${Date.now()}`,
       _firstFinish: true,
@@ -453,13 +453,13 @@ onMounted(async () => {
       bonus: payload.bonus,
       scannedAt: payload.finishedAt,
     })
-  })
+  }
 
-  socket.on('stats:updated', (payload) => {
+  const onStatsUpdated = (payload) => {
     renderCheckpoints({ checkpoints: payload.checkpoints, teamCount: payload.teamCount })
-  })
+  }
 
-  socket.on('location:updated', (payload) => {
+  const onLocationUpdated = (payload) => {
     // Patch the location in our cached list and re-render team dot
     const idx = lastLocations.findIndex(l => l.team.id === payload.teamId)
     const entry = { latitude: payload.latitude, longitude: payload.longitude, updatedAt: new Date().toISOString(), team: { id: payload.teamId, username: payload.teamUsername } }
@@ -468,11 +468,20 @@ onMounted(async () => {
     renderTeams(lastLocations)
     // Extend the route polyline live if this team is selected
     extendRoute(payload.teamId, payload.latitude, payload.longitude)
-  })
-})
+  }
 
-onUnmounted(() => {
-  if (map) { map.remove(); map = null }
+  socket.on('scan:created', onScanCreated)
+  socket.on('first:finish', onFirstFinish)
+  socket.on('stats:updated', onStatsUpdated)
+  socket.on('location:updated', onLocationUpdated)
+
+  onUnmounted(() => {
+    socket.off('scan:created', onScanCreated)
+    socket.off('first:finish', onFirstFinish)
+    socket.off('stats:updated', onStatsUpdated)
+    socket.off('location:updated', onLocationUpdated)
+    if (map) { map.remove(); map = null }
+  })
 })
 </script>
 

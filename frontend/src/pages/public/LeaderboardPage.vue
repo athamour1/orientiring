@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { api } from 'boot/axios'
 import { useRoute } from 'vue-router'
 import { useEventSocket } from 'src/composables/useEventSocket'
@@ -42,6 +42,7 @@ import { useEventSocket } from 'src/composables/useEventSocket'
 const leaderboard = ref([])
 const route = useRoute()
 let currentEventId = null
+let eventSocket = null
 
 const fetchLeaderboard = async () => {
   try {
@@ -68,7 +69,14 @@ onMounted(async () => {
   await fetchLeaderboard()
   if (currentEventId) {
     const { socket } = useEventSocket(currentEventId)
+    eventSocket = socket
     socket.on('scan:created', fetchLeaderboard)
+  }
+})
+
+onUnmounted(() => {
+  if (eventSocket) {
+    eventSocket.off('scan:created', fetchLeaderboard)
   }
 })
 

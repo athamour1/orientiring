@@ -74,6 +74,8 @@ const countdownLabel = computed(() => {
 
 let tickInterval = null
 let socket = null
+const onActivated = () => goToMap()
+const onReconnect = () => fetchEvent()
 
 async function fetchEvent() {
   try {
@@ -117,14 +119,17 @@ onMounted(async () => {
   if (teamEventStore.eventId) {
     const ws = useEventSocket(teamEventStore.eventId)
     socket = ws.socket
-    socket.on('event:activated', goToMap)
-    // On reconnect, resync event state in case we missed an activation
-    socket.on('connect', () => fetchEvent())
+    socket.on('event:activated', onActivated)
+    socket.on('connect', onReconnect)
   }
 })
 
 onUnmounted(() => {
   clearInterval(tickInterval)
+  if (socket) {
+    socket.off('event:activated', onActivated)
+    socket.off('connect', onReconnect)
+  }
 })
 </script>
 

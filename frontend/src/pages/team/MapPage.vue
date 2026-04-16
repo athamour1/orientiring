@@ -97,9 +97,7 @@ import 'leaflet/dist/leaflet.css'
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
-import { io } from 'socket.io-client'
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+import { socket, connectSocket } from 'src/boot/socket'
 
 const map = ref(null)
 const { t, locale } = useI18n()
@@ -134,7 +132,6 @@ let initialMapFit = false
 let lastSentLat = null
 let lastSentLng = null
 let lastSentTime = 0
-let locationSocket = null
 
 function locateMe() {
   if (lastSentLat !== null && map.value) {
@@ -216,26 +213,20 @@ onMounted(async () => {
     shadowUrl: markerShadow,
   });
 
-  // Connect socket for sending location updates and receiving event state changes
-  locationSocket = io(SOCKET_URL, {
-    transports: ['websocket'],
-    auth: { token: localStorage.getItem('token') },
-  })
+  // Ensure shared socket is connected
+  connectSocket()
 
   await fetchEvent()
 
   // Listen for event state changes via WS instead of polling
   if (teamEventStore.eventId) {
     const eid = Number(teamEventStore.eventId)
-    locationSocket.emit('join', eid)
-    locationSocket.on('event:ended', () => fetchEvent())
-    locationSocket.on('event:activated', () => fetchEvent())
+    socket.emit('join', eid)
+    socket.on('event:ended', onEventStateChange)
+    socket.on('event:activated', onEventStateChange)
 
     // On reconnect: re-join event room and resync state
-    locationSocket.on('connect', () => {
-      locationSocket.emit('join', eid)
-      fetchEvent()
-    })
+    socket.on('connect', onReconnect)
   }
 
   // Always track GPS — admin needs location data even when showTeamLocation is off
@@ -351,11 +342,20 @@ async function onPosition(pos) {
   const enoughTime = now - lastSentTime > 4000
   if (movedEnough || enoughTime) {
     gpsReady.value = true
-    locationSocket?.emit('location:update', { latitude, longitude })
+    socket.emit('location:update', { latitude, longitude })
     lastSentLat = latitude
     lastSentLng = longitude
     lastSentTime = now
   }
+}
+
+// Named handlers for proper cleanup
+const onEventStateChange = () => fetchEvent()
+const onReconnect = () => {
+  if (teamEventStore.eventId) {
+    socket.emit('join', Number(teamEventStore.eventId))
+  }
+  fetchEvent()
 }
 
 onUnmounted(() => {
@@ -363,7 +363,14 @@ onUnmounted(() => {
     navigator.geolocation.clearWatch(watchId)
   }
   if (endTimeTimeout) clearTimeout(endTimeTimeout)
-  locationSocket?.disconnect()
+
+  // Clean up socket listeners and leave room (don't disconnect — shared singleton)
+  if (teamEventStore.eventId) {
+    socket.emit('leave', Number(teamEventStore.eventId))
+  }
+  socket.off('event:ended', onEventStateChange)
+  socket.off('event:activated', onEventStateChange)
+  socket.off('connect', onReconnect)
 })
 
 const fetchEvent = async () => {

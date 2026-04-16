@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -100,10 +100,19 @@ const copyLink = () => {
   setTimeout(() => { copied.value = false }, 2500)
 }
 
+let eventSocket = null
+
 onMounted(async () => {
   await fetchLeaderboard()
   const { socket } = useEventSocket(eventId)
+  eventSocket = socket
   socket.on('scan:created', fetchLeaderboard)
+})
+
+onUnmounted(() => {
+  if (eventSocket) {
+    eventSocket.off('scan:created', fetchLeaderboard)
+  }
 })
 </script>
 
