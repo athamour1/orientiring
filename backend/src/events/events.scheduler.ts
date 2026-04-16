@@ -39,11 +39,14 @@ export class EventsScheduler {
           `Auto-activated event "${event.name}" (id=${event.id})`,
         );
       }
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P1017'
-      ) {
+    } catch (error: unknown) {
+      const isConnectionError =
+        error instanceof Prisma.PrismaClientInitializationError ||
+        error instanceof Prisma.PrismaClientRustPanicError ||
+        (error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code.startsWith('P10'));
+
+      if (isConnectionError) {
         this.logger.warn('DB connection lost, reconnecting…');
         try {
           await this.prisma.$disconnect();
