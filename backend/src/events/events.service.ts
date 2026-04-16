@@ -230,6 +230,40 @@ export class EventsService {
     return location;
   }
 
+  getUserInfo(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, eventId: true },
+    });
+  }
+
+  async bulkUpsertLocations(
+    entries: Map<number, { latitude: number; longitude: number }>,
+  ) {
+    const ops: any[] = [];
+    for (const [userId, loc] of entries) {
+      ops.push(
+        this.prisma.teamLocation.upsert({
+          where: { teamId: userId },
+          create: {
+            teamId: userId,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          },
+          update: { latitude: loc.latitude, longitude: loc.longitude },
+        }),
+        this.prisma.teamRoute.create({
+          data: {
+            teamId: userId,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          },
+        }),
+      );
+    }
+    await this.prisma.$transaction(ops);
+  }
+
   getTeamRoute(teamId: number) {
     return this.prisma.teamRoute.findMany({
       where: { teamId },
