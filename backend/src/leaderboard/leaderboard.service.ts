@@ -22,7 +22,15 @@ export class LeaderboardService {
       }),
       this.prisma.event.findUnique({
         where: { id: eventId },
-        select: { name: true, description: true, firstFinishBonus: true, firstFinishBonusAwardedToId: true, startTime: true, endTime: true, language: true },
+        select: {
+          name: true,
+          description: true,
+          firstFinishBonus: true,
+          firstFinishBonusAwardedToId: true,
+          startTime: true,
+          endTime: true,
+          language: true,
+        },
       }),
     ]);
 
@@ -36,12 +44,19 @@ export class LeaderboardService {
 
     // Per-checkpoint first-scan bonus: find the earliest scan per checkpoint
     // and credit its team with the bonusForFirst value
-    const byCheckpoint = new Map<number, { teamId: number; scannedAt: Date; bonus: number }>();
+    const byCheckpoint = new Map<
+      number,
+      { teamId: number; scannedAt: Date; bonus: number }
+    >();
     for (const scan of scans) {
       if (!scan.checkpoint.bonusForFirst) continue;
       const cur = byCheckpoint.get(scan.checkpointId);
       if (!cur || scan.scannedAt < cur.scannedAt) {
-        byCheckpoint.set(scan.checkpointId, { teamId: scan.teamId, scannedAt: scan.scannedAt, bonus: scan.checkpoint.bonusForFirst });
+        byCheckpoint.set(scan.checkpointId, {
+          teamId: scan.teamId,
+          scannedAt: scan.scannedAt,
+          bonus: scan.checkpoint.bonusForFirst,
+        });
       }
     }
     for (const { teamId, bonus } of byCheckpoint.values()) {
@@ -54,7 +69,9 @@ export class LeaderboardService {
       if (winner) winner.score += event.firstFinishBonus;
     }
 
-    const leaderboard = Array.from(scoresMap.values()).sort((a, b) => b.score - a.score);
+    const leaderboard = Array.from(scoresMap.values()).sort(
+      (a, b) => b.score - a.score,
+    );
     const result = {
       eventName: event?.name ?? 'Event',
       eventDescription: event?.description ?? '',
@@ -64,7 +81,10 @@ export class LeaderboardService {
       leaderboard,
     };
 
-    this.cache.set(eventId, { data: result, expiresAt: Date.now() + CACHE_TTL_MS });
+    this.cache.set(eventId, {
+      data: result,
+      expiresAt: Date.now() + CACHE_TTL_MS,
+    });
     return result;
   }
 }

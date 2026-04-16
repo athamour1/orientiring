@@ -1,4 +1,15 @@
-import { IsString, IsBoolean, IsOptional, MaxLength, IsDateString, IsIn, IsInt, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  MaxLength,
+  IsDateString,
+  IsIn,
+  IsInt,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class UpdateEventDto {
   @IsOptional()
@@ -43,22 +54,26 @@ export class UpdateEventDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(-90) @Max(90)
+  @Min(-90)
+  @Max(90)
   startLat?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(-180) @Max(180)
+  @Min(-180)
+  @Max(180)
   startLng?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(-90) @Max(90)
+  @Min(-90)
+  @Max(90)
   returnLat?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(-180) @Max(180)
+  @Min(-180)
+  @Max(180)
   returnLng?: number;
 
   @IsOptional()

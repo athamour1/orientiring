@@ -5,18 +5,28 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
-const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL', 'ADMIN_USERNAME', 'ADMIN_PASSWORD', 'CORS_ORIGIN'];
+const REQUIRED_ENV = [
+  'JWT_SECRET',
+  'DATABASE_URL',
+  'ADMIN_USERNAME',
+  'ADMIN_PASSWORD',
+  'CORS_ORIGIN',
+];
 
 function validateEnv() {
   const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}`,
+    );
   }
   if (process.env.JWT_SECRET!.length < 32) {
     throw new Error('JWT_SECRET must be at least 32 characters long');
   }
   if (process.env.CORS_ORIGIN === '*') {
-    throw new Error('CORS_ORIGIN must not be wildcard (*) in production. Set it to your frontend domain.');
+    throw new Error(
+      'CORS_ORIGIN must not be wildcard (*) in production. Set it to your frontend domain.',
+    );
   }
 }
 
@@ -26,7 +36,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.useGlobalFilters(new PrismaExceptionFilter());
   app.use(helmet());
 

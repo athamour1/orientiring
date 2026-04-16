@@ -4,6 +4,6 @@ import { CheckpointsController } from './checkpoints.controller';
 
 @Module({
   providers: [CheckpointsService],
-  controllers: [CheckpointsController]
+  controllers: [CheckpointsController],
 })
 export class CheckpointsModule {}

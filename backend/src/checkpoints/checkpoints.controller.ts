@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { CheckpointsService } from './checkpoints.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,7 +26,10 @@ export class CheckpointsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Post()
-  create(@Param('eventId') eventId: string, @Body() createCheckpointDto: CreateCheckpointDto) {
+  create(
+    @Param('eventId') eventId: string,
+    @Body() createCheckpointDto: CreateCheckpointDto,
+  ) {
     return this.checkpointsService.create(+eventId, createCheckpointDto);
   }
 
@@ -37,7 +50,10 @@ export class CheckpointsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCheckpointDto: UpdateCheckpointDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCheckpointDto: UpdateCheckpointDto,
+  ) {
     return this.checkpointsService.update(+id, updateCheckpointDto);
   }
 

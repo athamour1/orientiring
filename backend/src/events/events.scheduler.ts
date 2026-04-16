@@ -22,10 +22,7 @@ export class EventsScheduler {
       where: {
         isActive: false,
         startTime: { lte: now },
-        OR: [
-          { endTime: null },
-          { endTime: { gt: now } },
-        ],
+        OR: [{ endTime: null }, { endTime: { gt: now } }],
       },
       select: { id: true, name: true },
     });

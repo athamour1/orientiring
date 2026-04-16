@@ -1,4 +1,17 @@
-import { Controller, Post, Put, Get, Body, Headers, HttpCode, HttpStatus, UnauthorizedException, BadRequestException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Put,
+  Get,
+  Body,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  UnauthorizedException,
+  BadRequestException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -20,7 +33,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() signInDto: LoginDto) {
-    const user = await this.authService.validateUser(signInDto.username, signInDto.password);
+    const user = await this.authService.validateUser(
+      signInDto.username,
+      signInDto.password,
+    );
     if (!user) {
       throw new UnauthorizedException();
     }
@@ -49,7 +65,10 @@ export class AuthController {
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Put('profile/language')
-  async changeLanguage(@Request() req: any, @Body() body: { language: string }) {
+  async changeLanguage(
+    @Request() req: any,
+    @Body() body: { language: string },
+  ) {
     const user = await this.usersService.findByUsername(req.user.username);
     if (!user) throw new UnauthorizedException();
     await this.usersService.updateAdminLanguage(user.id, body.language);

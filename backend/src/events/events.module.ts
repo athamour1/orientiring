@@ -7,9 +7,7 @@ import { EventsGateway } from './events.gateway';
 import { EventsScheduler } from './events.scheduler';
 
 @Module({
-  imports: [
-    JwtModule.register({ secret: process.env.JWT_SECRET }),
-  ],
+  imports: [JwtModule.register({ secret: process.env.JWT_SECRET })],
   controllers: [EventsController, TeamEventsController],
   providers: [EventsService, EventsGateway, EventsScheduler],
   exports: [EventsService, EventsGateway],

@@ -17,21 +17,26 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty', options: { colorize: true } }
-          : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { colorize: true } }
+            : undefined,
         level: process.env.LOG_LEVEL || 'info',
         redact: ['req.headers.authorization', 'req.headers.cookie'],
         serializers: {
-          req: (req) => ({ method: req.method, url: req.url, remoteAddress: req.remoteAddress }),
+          req: (req) => ({
+            method: req.method,
+            url: req.url,
+            remoteAddress: req.remoteAddress,
+          }),
           res: (res) => ({ statusCode: res.statusCode }),
         },
       },
     }),
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60000, limit: 300 },  // 300 req/min globally
-      { name: 'auth', ttl: 60000, limit: 10 },       // 10 req/min for auth (applied per controller)
+      { name: 'default', ttl: 60000, limit: 300 }, // 300 req/min globally
+      { name: 'auth', ttl: 60000, limit: 10 }, // 10 req/min for auth (applied per controller)
     ]),
     PrismaModule,
     AuthModule,
@@ -42,9 +47,6 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     LeaderboardModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

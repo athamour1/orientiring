@@ -11,18 +11,22 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
-  async createTeam(username: string, plainTextPassword: string, eventId?: number) {
+  async createTeam(
+    username: string,
+    plainTextPassword: string,
+    eventId?: number,
+  ) {
     const passwordHash = await bcrypt.hash(plainTextPassword, 10);
     return this.prisma.user.create({
       data: {
         username,
         passwordHash,
         role: Role.TEAM,
-        eventId: eventId || null
+        eventId: eventId || null,
       },
     });
   }
-  
+
   async createAdmin(username: string, plainTextPassword: string) {
     const passwordHash = await bcrypt.hash(plainTextPassword, 10);
     return this.prisma.user.create({
@@ -41,8 +45,13 @@ export class UsersService {
   async updateTeam(id: number, username?: string, plainTextPassword?: string) {
     const data: any = {};
     if (username) data.username = username;
-    if (plainTextPassword) data.passwordHash = await bcrypt.hash(plainTextPassword, 10);
-    return this.prisma.user.update({ where: { id }, data, select: { id: true, username: true } });
+    if (plainTextPassword)
+      data.passwordHash = await bcrypt.hash(plainTextPassword, 10);
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: { id: true, username: true },
+    });
   }
 
   async remove(id: number) {

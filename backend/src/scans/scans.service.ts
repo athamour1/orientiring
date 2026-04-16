@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsGateway } from '../events/events.gateway';
 
@@ -30,7 +35,9 @@ export class ScansService {
     }
 
     if (team?.eventId && team.eventId !== checkpoint.eventId) {
-      throw new BadRequestException('This checkpoint does not belong to your event');
+      throw new BadRequestException(
+        'This checkpoint does not belong to your event',
+      );
     }
 
     if (!checkpoint.event.isActive) {
@@ -55,7 +62,11 @@ export class ScansService {
     ]);
 
     if (existingScan) {
-      this.logger.warn({ msg: 'Duplicate scan attempt', teamId, checkpointId: checkpoint.id });
+      this.logger.warn({
+        msg: 'Duplicate scan attempt',
+        teamId,
+        checkpointId: checkpoint.id,
+      });
       throw new ConflictException('Checkpoint already scanned by your team');
     }
 
@@ -67,14 +78,25 @@ export class ScansService {
       include: { checkpoint: true },
     });
 
-    const result = { ...scan, isFirst, bonusAwarded: isFirst ? checkpoint.bonusForFirst : 0 };
-    this.logger.log({ msg: 'Scan recorded', teamId, checkpointId: checkpoint.id, checkpointName: checkpoint.name, isFirst });
+    const result = {
+      ...scan,
+      isFirst,
+      bonusAwarded: isFirst ? checkpoint.bonusForFirst : 0,
+    };
+    this.logger.log({
+      msg: 'Scan recorded',
+      teamId,
+      checkpointId: checkpoint.id,
+      checkpointName: checkpoint.name,
+      isFirst,
+    });
 
     // Batch 3: All post-create reads in parallel (saves 3 round trips)
     // - Stats for WebSocket broadcast
     // - First-finisher check (teamScans count) when applicable
     const needsFirstFinishCheck =
-      checkpoint.event.firstFinishBonus > 0 && !checkpoint.event.firstFinishBonusAwardedToId;
+      checkpoint.event.firstFinishBonus > 0 &&
+      !checkpoint.event.firstFinishBonusAwardedToId;
 
     const [updatedCheckpoints, teamCount, ...extra] = await Promise.all([
       this.prisma.checkpoint.findMany({
@@ -83,14 +105,18 @@ export class ScansService {
       }),
       this.prisma.user.count({ where: { eventId: checkpoint.eventId } }),
       ...(needsFirstFinishCheck
-        ? [this.prisma.scan.count({ where: { teamId, checkpoint: { eventId: checkpoint.eventId } } })]
+        ? [
+            this.prisma.scan.count({
+              where: { teamId, checkpoint: { eventId: checkpoint.eventId } },
+            }),
+          ]
         : []),
     ]);
 
     // Check first finisher using checkpoint count from the already-fetched list
     let isFirstFinisher = false;
     if (needsFirstFinishCheck) {
-      const teamScans = extra[0] as number;
+      const teamScans = extra[0];
       if (teamScans >= updatedCheckpoints.length) {
         await this.prisma.event.update({
           where: { id: checkpoint.eventId },

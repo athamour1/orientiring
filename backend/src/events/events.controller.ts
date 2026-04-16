@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -61,7 +71,11 @@ export class EventsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.eventsService.getLogs(+id, page ? +page : 1, limit ? +limit : 50);
+    return this.eventsService.getLogs(
+      +id,
+      page ? +page : 1,
+      limit ? +limit : 50,
+    );
   }
 
   @Roles(Role.ADMIN)

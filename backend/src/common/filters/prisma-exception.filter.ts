@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
@@ -31,10 +37,18 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         message = 'Invalid relation data';
         break;
       default:
-        this.logger.error({ msg: 'Unhandled Prisma error', code: exception.code, detail: exception.message });
+        this.logger.error({
+          msg: 'Unhandled Prisma error',
+          code: exception.code,
+          detail: exception.message,
+        });
     }
 
-    this.logger.warn({ msg: 'Prisma error', code: exception.code, statusCode: status });
+    this.logger.warn({
+      msg: 'Prisma error',
+      code: exception.code,
+      statusCode: status,
+    });
     response.status(status).json({ statusCode: status, message });
   }
 }

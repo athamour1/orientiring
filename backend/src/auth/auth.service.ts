@@ -9,12 +9,12 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
-    if (user && await bcrypt.compare(pass, user.passwordHash)) {
+    if (user && (await bcrypt.compare(pass, user.passwordHash))) {
       const { passwordHash, ...result } = user;
       this.logger.log({ msg: 'Login successful', username, role: user.role });
       return result;
@@ -28,18 +28,25 @@ export class AuthService {
     const expiresIn = keepLoggedIn ? '30d' : '8h';
     return {
       access_token: this.jwtService.sign(payload, { expiresIn }),
-      role: user.role
+      role: user.role,
     };
   }
 
   async refresh(token: string) {
     try {
       const decoded = this.jwtService.verify(token);
-      const payload = { username: decoded.username, sub: decoded.sub, role: decoded.role };
+      const payload = {
+        username: decoded.username,
+        sub: decoded.sub,
+        role: decoded.role,
+      };
       // Preserve the original expiry duration so keepLoggedIn tokens stay long-lived
       const originalDuration = decoded.exp - decoded.iat;
       const expiresIn = originalDuration > 24 * 60 * 60 ? '30d' : '8h';
-      return { access_token: this.jwtService.sign(payload, { expiresIn }), role: decoded.role };
+      return {
+        access_token: this.jwtService.sign(payload, { expiresIn }),
+        role: decoded.role,
+      };
     } catch {
       this.logger.warn({ msg: 'Token refresh failed' });
       throw new UnauthorizedException('Token invalid or expired');

@@ -28,7 +28,7 @@ export class AppController {
   @Get('config')
   getConfig() {
     return {
-      defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en-US'
+      defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en-US',
     };
   }
 }

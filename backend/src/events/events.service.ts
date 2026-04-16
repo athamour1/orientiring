@@ -21,7 +21,10 @@ export class EventsService {
   }
 
   findOne(id: number) {
-    return this.prisma.event.findUnique({ where: { id }, include: { checkpoints: true } });
+    return this.prisma.event.findUnique({
+      where: { id },
+      include: { checkpoints: true },
+    });
   }
 
   update(id: number, data: UpdateEventDto) {
@@ -46,7 +49,14 @@ export class EventsService {
         where: { checkpoint: { eventId } },
         include: {
           team: { select: { id: true, username: true } },
-          checkpoint: { select: { id: true, name: true, pointValue: true, bonusForFirst: true } },
+          checkpoint: {
+            select: {
+              id: true,
+              name: true,
+              pointValue: true,
+              bonusForFirst: true,
+            },
+          },
         },
         orderBy: { scannedAt: 'desc' },
         skip,
@@ -61,8 +71,8 @@ export class EventsService {
       }),
     ]);
 
-    const firstScanIds = new Set(firstScans.map(s => s.id));
-    return scans.map(s => ({
+    const firstScanIds = new Set(firstScans.map((s) => s.id));
+    return scans.map((s) => ({
       ...s,
       bonusAwarded: firstScanIds.has(s.id) ? s.checkpoint.bonusForFirst : 0,
     }));
@@ -82,33 +92,53 @@ export class EventsService {
   async getDashboardStats() {
     const [teamCounts, checkpointCounts, scanCounts] = await Promise.all([
       this.prisma.user.groupBy({ by: ['eventId'], _count: { _all: true } }),
-      this.prisma.checkpoint.groupBy({ by: ['eventId'], _count: { _all: true } }),
-      this.prisma.scan.groupBy({ by: ['checkpointId'], _count: { _all: true } }),
+      this.prisma.checkpoint.groupBy({
+        by: ['eventId'],
+        _count: { _all: true },
+      }),
+      this.prisma.scan.groupBy({
+        by: ['checkpointId'],
+        _count: { _all: true },
+      }),
     ]);
 
     // Map scanCounts to eventId via checkpoint lookup
     const checkpointEventMap = await this.prisma.checkpoint.findMany({
       select: { id: true, eventId: true },
     });
-    const cpEventId = new Map(checkpointEventMap.map(c => [c.id, c.eventId]));
+    const cpEventId = new Map(checkpointEventMap.map((c) => [c.id, c.eventId]));
     const scansByEvent = new Map<number, number>();
     for (const s of scanCounts) {
       const evId = cpEventId.get(s.checkpointId);
-      if (evId) scansByEvent.set(evId, (scansByEvent.get(evId) ?? 0) + s._count._all);
+      if (evId)
+        scansByEvent.set(evId, (scansByEvent.get(evId) ?? 0) + s._count._all);
     }
 
-    const result: Record<number, { teamCount: number; checkpointCount: number; scanCount: number }> = {};
+    const result: Record<
+      number,
+      { teamCount: number; checkpointCount: number; scanCount: number }
+    > = {};
     for (const row of teamCounts) {
       if (row.eventId == null) continue;
-      result[row.eventId] = { teamCount: row._count._all, checkpointCount: 0, scanCount: 0 };
+      result[row.eventId] = {
+        teamCount: row._count._all,
+        checkpointCount: 0,
+        scanCount: 0,
+      };
     }
     for (const row of checkpointCounts) {
       if (row.eventId == null) continue;
-      if (!result[row.eventId]) result[row.eventId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
+      if (!result[row.eventId])
+        result[row.eventId] = {
+          teamCount: 0,
+          checkpointCount: 0,
+          scanCount: 0,
+        };
       result[row.eventId].checkpointCount = row._count._all;
     }
     for (const [evId, count] of scansByEvent) {
-      if (!result[evId]) result[evId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
+      if (!result[evId])
+        result[evId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
       result[evId].scanCount = count;
     }
     return result;
@@ -154,7 +184,11 @@ export class EventsService {
       where: { teamId: userId, checkpoint: { eventId: event.id } },
     });
 
-    return { ...event, status, scannedCheckpointIds: scans.map((s: any) => s.checkpointId) };
+    return {
+      ...event,
+      status,
+      scannedCheckpointIds: scans.map((s: any) => s.checkpointId),
+    };
   }
 
   async upsertTeamLocation(userId: number, dto: UpdateLocationDto) {
@@ -168,11 +202,19 @@ export class EventsService {
     const [location] = await this.prisma.$transaction([
       this.prisma.teamLocation.upsert({
         where: { teamId: userId },
-        create: { teamId: userId, latitude: dto.latitude, longitude: dto.longitude },
+        create: {
+          teamId: userId,
+          latitude: dto.latitude,
+          longitude: dto.longitude,
+        },
         update: { latitude: dto.latitude, longitude: dto.longitude },
       }),
       this.prisma.teamRoute.create({
-        data: { teamId: userId, latitude: dto.latitude, longitude: dto.longitude },
+        data: {
+          teamId: userId,
+          latitude: dto.latitude,
+          longitude: dto.longitude,
+        },
       }),
     ]);
 
