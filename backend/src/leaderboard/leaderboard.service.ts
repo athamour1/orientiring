@@ -9,9 +9,9 @@ export class LeaderboardService {
 
   private cache = new Map<number, { data: any; expiresAt: number }>();
 
-  async getLeaderboard(eventId: number) {
+  async getLeaderboard(eventId: number, invalidateCache = false) {
     const cached = this.cache.get(eventId);
-    if (cached && Date.now() < cached.expiresAt) {
+    if (!invalidateCache && cached && Date.now() < cached.expiresAt) {
       return cached.data;
     }
 

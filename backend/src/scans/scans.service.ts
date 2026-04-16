@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsGateway } from '../events/events.gateway';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 
 @Injectable()
 export class ScansService {
@@ -14,6 +15,7 @@ export class ScansService {
   constructor(
     private prisma: PrismaService,
     private gateway: EventsGateway,
+    private leaderboardService: LeaderboardService,
   ) {}
 
   async processScan(teamId: number, qrSecretString: string) {
@@ -151,6 +153,16 @@ export class ScansService {
         finishedAt: scan.scannedAt,
       });
     }
+
+    // Recompute and push leaderboard to all viewers (single DB query instead of N client fetches)
+    this.leaderboardService
+      .getLeaderboard(checkpoint.eventId, true)
+      .then((leaderboard) => {
+        this.gateway.emitLeaderboardUpdated(checkpoint.eventId, leaderboard);
+      })
+      .catch((err) => {
+        this.logger.error('Failed to push leaderboard update', err);
+      });
 
     return result;
   }
