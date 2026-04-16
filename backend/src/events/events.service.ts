@@ -7,6 +7,9 @@ import { EventsGateway } from './events.gateway';
 
 @Injectable()
 export class EventsService {
+  private dashboardCache: { data: any; expiresAt: number } | null = null;
+  private static readonly DASHBOARD_CACHE_TTL = 30_000; // 30 seconds
+
   constructor(
     private prisma: PrismaService,
     @Inject(forwardRef(() => EventsGateway)) private gateway: EventsGateway,
@@ -90,6 +93,13 @@ export class EventsService {
   }
 
   async getDashboardStats() {
+    if (
+      this.dashboardCache &&
+      Date.now() < this.dashboardCache.expiresAt
+    ) {
+      return this.dashboardCache.data;
+    }
+
     const [teamCounts, checkpointCounts, scanCounts] = await Promise.all([
       this.prisma.user.groupBy({ by: ['eventId'], _count: { _all: true } }),
       this.prisma.checkpoint.groupBy({
@@ -141,6 +151,11 @@ export class EventsService {
         result[evId] = { teamCount: 0, checkpointCount: 0, scanCount: 0 };
       result[evId].scanCount = count;
     }
+
+    this.dashboardCache = {
+      data: result,
+      expiresAt: Date.now() + EventsService.DASHBOARD_CACHE_TTL,
+    };
     return result;
   }
 
