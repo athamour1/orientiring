@@ -1,40 +1,31 @@
-import { onUnmounted, ref } from 'vue'
-import { io } from 'socket.io-client'
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+import { onUnmounted } from 'vue'
+import { socket, isConnected, connectSocket } from 'src/boot/socket'
 
 /**
- * Connect to the WebSocket gateway and join a specific event room.
- * Returns { socket, isConnected } so callers can react to connection state.
+ * Join a specific event room on the shared WebSocket connection.
+ * Returns { socket, isConnected } so callers can listen to events.
+ * Automatically leaves the room when the component unmounts.
  *
  * Usage:
  *   const { socket, isConnected } = useEventSocket(eventId)
  *   socket.on('scan:created', handler)
  */
 export function useEventSocket(eventId) {
-  const isConnected = ref(false)
+  const eid = Number(eventId)
 
-  const socket = io(SOCKET_URL, {
-    transports: ['websocket'],
-    auth: { token: localStorage.getItem('token') },
-  })
+  // Ensure connected
+  connectSocket()
 
-  socket.on('connect', () => {
-    isConnected.value = true
-    socket.emit('join', Number(eventId))
-  })
-
-  socket.on('disconnect', () => {
-    isConnected.value = false
-  })
-
-  socket.on('connect_error', () => {
-    isConnected.value = false
-  })
+  // Join now if already connected, and re-join on every reconnect
+  if (socket.connected) {
+    socket.emit('join', eid)
+  }
+  const onConnect = () => socket.emit('join', eid)
+  socket.on('connect', onConnect)
 
   onUnmounted(() => {
-    socket.emit('leave', Number(eventId))
-    socket.disconnect()
+    socket.emit('leave', eid)
+    socket.off('connect', onConnect)
   })
 
   return { socket, isConnected }
