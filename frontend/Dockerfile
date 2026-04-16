@@ -18,6 +18,9 @@ FROM nginx:alpine
 # Quasar PWA output folder
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
+# SPA fallback nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Entrypoint script for runtime env var injection
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
