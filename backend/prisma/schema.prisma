@@ -13,68 +13,68 @@ enum Role {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
+  id           Int    @id @default(autoincrement())
+  username     String @unique
   passwordHash String
-  role         Role     @default(TEAM)
+  role         Role   @default(TEAM)
 
-  language     String   @default("en-US")
-  eventId      Int?
-  event        Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  language String @default("en-US")
+  eventId  Int?
+  event    Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  scans        Scan[]
-  location     TeamLocation?
-  route        TeamRoute[]
+  scans    Scan[]
+  location TeamLocation?
+  route    TeamRoute[]
 
   @@index([eventId])
 }
 
 model Event {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String?
-  startTime   DateTime?
-  endTime     DateTime?
-  isActive          Boolean      @default(false)
-  showTeamLocation      Boolean      @default(true)
-  showDirectionArrow    Boolean      @default(false)
-  language          String       @default("en-US")
-  firstFinishBonus  Int          @default(0)
+  id                          Int       @id @default(autoincrement())
+  name                        String
+  description                 String?
+  startTime                   DateTime?
+  endTime                     DateTime?
+  isActive                    Boolean   @default(false)
+  showTeamLocation            Boolean   @default(true)
+  showDirectionArrow          Boolean   @default(false)
+  language                    String    @default("en-US")
+  firstFinishBonus            Int       @default(0)
   firstFinishBonusAwardedToId Int?
-  startLat          Float?
-  startLng          Float?
-  returnLat         Float?
-  returnLng         Float?
-  returnSameAsStart Boolean      @default(true)
+  startLat                    Float?
+  startLng                    Float?
+  returnLat                   Float?
+  returnLng                   Float?
+  returnSameAsStart           Boolean   @default(true)
 
   checkpoints Checkpoint[]
   teams       User[]
 }
 
 model Checkpoint {
-  id             Int      @id @default(autoincrement())
+  id             Int    @id @default(autoincrement())
   eventId        Int
   name           String
   latitude       Float
   longitude      Float
-  pointValue     Int      @default(10)
-  bonusForFirst  Int      @default(0)
-  qrSecretString String   @unique
-  
-  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  scans          Scan[]
+  pointValue     Int    @default(10)
+  bonusForFirst  Int    @default(0)
+  qrSecretString String @unique
+
+  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scans Scan[]
 
   @@index([eventId])
 }
 
 model Scan {
-  id           Int        @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   teamId       Int
   checkpointId Int
-  scannedAt    DateTime   @default(now())
+  scannedAt    DateTime @default(now())
 
-  team         User       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+  team       User       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
 
   // Enforces that a team can scan a specific checkpoint only once
   @@unique([teamId, checkpointId])
@@ -88,17 +88,17 @@ model TeamLocation {
   longitude Float
   updatedAt DateTime @updatedAt
 
-  team      User     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team User @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
 
 model TeamRoute {
-  id          Int      @id @default(autoincrement())
-  teamId      Int
-  latitude    Float
-  longitude   Float
-  recordedAt  DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  teamId     Int
+  latitude   Float
+  longitude  Float
+  recordedAt DateTime @default(now())
 
-  team        User     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team User @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([teamId])
 }
