@@ -60,6 +60,7 @@ export class EventsScheduler {
         );
       }
     } catch (error: unknown) {
+      // Prisma reconnects automatically on the next query — just log and wait.
       const isConnectionError =
         error instanceof Prisma.PrismaClientInitializationError ||
         error instanceof Prisma.PrismaClientRustPanicError ||
@@ -67,16 +68,7 @@ export class EventsScheduler {
           error.code.startsWith('P10'));
 
       if (isConnectionError) {
-        this.logger.warn('DB connection lost, will retry on next tick');
-        try {
-          await this.prisma.$disconnect();
-        } catch {}
-        try {
-          await this.prisma.$connect();
-          this.logger.log('DB reconnected successfully');
-        } catch {
-          this.logger.warn('DB still unavailable, retrying in next cycle');
-        }
+        this.logger.warn('DB unavailable, will retry on next tick');
       } else {
         this.logger.error('Scheduler error', error);
       }
