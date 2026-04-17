@@ -61,6 +61,20 @@
       @click="locateMe"
     />
 
+    <!-- iOS compass permission banner -->
+    <transition name="slide-up">
+      <div v-if="showCompassPrompt" class="compass-banner">
+        <div class="compass-banner-inner" @click="requestCompass">
+          <span class="compass-icon">🧭</span>
+          <div class="compass-text">
+            <div class="compass-title">{{ $t('enableCompass') }}</div>
+            <div class="compass-sub">{{ $t('enableCompassHint') }}</div>
+          </div>
+          <q-icon name="touch_app" color="white" size="24px" />
+        </div>
+      </div>
+    </transition>
+
     <!-- GPS blocked overlay -->
     <transition name="fade">
       <div v-if="gpsBlocked" class="gps-overlay">
@@ -114,9 +128,11 @@ const gpsPermissionDenied = ref(false)
 const gpsRetrying = ref(false)
 const followMode = ref(false)
 const gpsReady = ref(false)
+const showCompassPrompt = ref(false)
 const activeBaseName = ref('street')
 const baseLayers = ref([])
 let currentBaseTile = null
+let handleOrientation = null // compass handler — hoisted for cleanup
 
 function switchBase(layer) {
   if (!map.value || !layer) return
@@ -242,7 +258,7 @@ onMounted(async () => {
   // Android: 'deviceorientationabsolute' gives magnetic-north absolute readings.
   //   alpha increases counter-clockwise, so bearing = (360 - alpha) % 360.
   // Fallback 'deviceorientation' on Android has alpha relative to device start → unreliable.
-  const handleOrientation = (e) => {
+  handleOrientation = (e) => {
     if (e.webkitCompassHeading != null) {
       // iOS — already a clockwise bearing from true north
       heading.value = e.webkitCompassHeading
@@ -255,10 +271,20 @@ onMounted(async () => {
 
   if (window.DeviceOrientationEvent) {
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // iOS 13+ — requires explicit permission
-      DeviceOrientationEvent.requestPermission().then(state => {
-        if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation)
-      }).catch(() => {})
+      // iOS 13+ — requestPermission() must be called from a user gesture.
+      // Check if already granted (e.g. from a previous session).
+      try {
+        const state = await DeviceOrientationEvent.requestPermission()
+        if (state === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation)
+        } else {
+          showCompassPrompt.value = true
+        }
+      } catch {
+        // Not inside a user gesture context — expected on first load.
+        // Show banner so the user can tap to grant permission.
+        showCompassPrompt.value = true
+      }
     } else {
       // Android: prefer 'deviceorientationabsolute' (magnetic north reference).
       // Falls back to 'deviceorientation' if not supported.
@@ -310,6 +336,19 @@ function makeUserIcon(deg) {
 function updateUserMarkerIcon() {
   if (userMarker.value) {
     userMarker.value.setIcon(makeUserIcon(heading.value))
+  }
+}
+
+async function requestCompass() {
+  if (typeof DeviceOrientationEvent.requestPermission !== 'function') return
+  try {
+    const state = await DeviceOrientationEvent.requestPermission()
+    if (state === 'granted') {
+      window.addEventListener('deviceorientation', handleOrientation)
+      showCompassPrompt.value = false
+    }
+  } catch (err) {
+    console.warn('Compass permission denied', err)
   }
 }
 
@@ -593,6 +632,35 @@ watch(() => teamEventStore.endTime, (val) => {
 .banner-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
 .banner-sub { font-size: 0.8rem; opacity: 0.9; margin-top: 3px; font-weight: 500; line-height: 1.3; }
 
+
+/* iOS compass permission banner */
+.compass-banner {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  pointer-events: auto;
+  width: calc(100% - 120px);
+  max-width: 340px;
+}
+.compass-banner-inner {
+  background: linear-gradient(135deg, #8e5add, #6c3fc4);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.compass-banner-inner:active { opacity: 0.85; }
+.compass-icon { font-size: 1.6rem; line-height: 1; flex-shrink: 0; }
+.compass-text { flex: 1; min-width: 0; }
+.compass-title { font-size: 0.92rem; font-weight: 700; line-height: 1.2; }
+.compass-sub { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; line-height: 1.3; }
 
 .slide-up-enter-active { transition: transform 0.35s ease, opacity 0.35s ease; }
 .slide-up-leave-active { transition: transform 0.25s ease, opacity 0.25s ease; }

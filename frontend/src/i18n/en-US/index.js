@@ -184,6 +184,8 @@ export default {
   gpsUnavailable: 'GPS is currently unavailable. Make sure location services are enabled on your device.',
   gpsEnableHint: 'Tap the lock icon in your browser\'s address bar and allow Location access, then retry.',
   retryGps: 'Retry Location Access',
+  enableCompass: 'Tap to Enable Compass',
+  enableCompassHint: 'Allow compass access for accurate direction tracking',
   mapLayer: 'Map Style',
   overlays: 'Overlays',
   showRouteTooltip: 'Click to filter & show this team\'s GPS route on the map',
